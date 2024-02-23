@@ -24,8 +24,9 @@ import com.alipay.sofa.jraft.conf.Configuration;
 import com.alipay.sofa.jraft.entity.PeerId;
 import com.alipay.sofa.jraft.option.CliOptions;
 import com.alipay.sofa.jraft.rpc.CliClientService;
-import com.alipay.sofa.jraft.rpc.impl.AbstractBoltClientService;
-import com.alipay.sofa.jraft.rpc.impl.cli.BoltCliClientService;
+import com.alipay.sofa.jraft.rpc.impl.AbstractClientService;
+import com.alipay.sofa.jraft.rpc.impl.BoltRpcClient;
+import com.alipay.sofa.jraft.rpc.impl.cli.CliClientServiceImpl;
 import com.alipay.sofa.registry.jraft.command.ProcessRequest;
 import com.alipay.sofa.registry.jraft.command.ProcessResponse;
 import com.alipay.sofa.registry.jraft.handler.NotifyLeaderChangeHandler;
@@ -35,39 +36,42 @@ import com.alipay.sofa.registry.log.LoggerFactory;
 import com.alipay.sofa.registry.remoting.bolt.ConnectionEventAdapter;
 import com.alipay.sofa.registry.remoting.bolt.SyncUserProcessorAdapter;
 
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- *
  * @author shangyu.wh
  * @version $Id: RaftClient.java, v 0.1 2018-05-16 11:40 shangyu.wh Exp $
  */
 public class RaftClient {
 
-    private static final Logger  LOGGER  = LoggerFactory.getLogger(RaftClient.class);
+    private static final Logger LOGGER  = LoggerFactory.getLogger(RaftClient.class);
 
-    private BoltCliClientService cliClientService;
-    private RpcClient            rpcClient;
-    private CliOptions           cliOptions;
-    private String               groupId;
-    private Configuration        conf;
+    private CliClientService    cliClientService;
+    private RpcClient           rpcClient;
+    private CliOptions          cliOptions;
+    private String              groupId;
+    private Configuration       conf;
 
-    private AtomicBoolean        started = new AtomicBoolean(false);
+    private AtomicBoolean       started = new AtomicBoolean(false);
+
+    private ThreadPoolExecutor  executor;
 
     /**
      * @param groupId
-     * @param confStr  Example: 127.0.0.1:8081,127.0.0.1:8082,127.0.0.1:8083
+     * @param confStr Example: 127.0.0.1:8081,127.0.0.1:8082,127.0.0.1:8083
      */
-    public RaftClient(String groupId, String confStr) {
+    public RaftClient(String groupId, String confStr, ThreadPoolExecutor executor) {
 
         this.groupId = groupId;
+        this.executor = executor;
         conf = new Configuration();
         if (!conf.parse(confStr)) {
             throw new IllegalArgumentException("Fail to parse conf:" + confStr);
         }
         cliOptions = new CliOptions();
-        cliClientService = new BoltCliClientService();
+        cliClientService = new CliClientServiceImpl();
     }
 
     /**
@@ -75,15 +79,17 @@ public class RaftClient {
      * @param confStr
      * @param cliClientService
      */
-    public RaftClient(String groupId, String confStr, AbstractBoltClientService cliClientService) {
+    public RaftClient(String groupId, String confStr, AbstractClientService cliClientService,
+                      ThreadPoolExecutor executor) {
 
         this.groupId = groupId;
+        this.executor = executor;
         conf = new Configuration();
         if (!conf.parse(confStr)) {
             throw new IllegalArgumentException("Fail to parse conf:" + confStr);
         }
         cliOptions = new CliOptions();
-        this.cliClientService = (BoltCliClientService) cliClientService;
+        this.cliClientService = (CliClientService) cliClientService;
     }
 
     /**
@@ -96,10 +102,12 @@ public class RaftClient {
 
             cliClientService.init(cliOptions);
 
-            rpcClient = cliClientService.getRpcClient();
+            BoltRpcClient jraftRpcClient = ((BoltRpcClient) ((AbstractClientService) cliClientService)
+                .getRpcClient());
+            rpcClient = jraftRpcClient.getRpcClient();
 
             RaftClientConnectionHandler raftClientConnectionHandler = new RaftClientConnectionHandler(
-                this);
+                this, executor);
 
             rpcClient.addConnectionEventProcessor(ConnectionEventType.CONNECT,
                 new ConnectionEventAdapter(ConnectionEventType.CONNECT,
@@ -113,7 +121,7 @@ public class RaftClient {
 
             //reset leader notify
             NotifyLeaderChangeHandler notifyLeaderChangeHandler = new NotifyLeaderChangeHandler(
-                groupId, cliClientService);
+                groupId, cliClientService, executor);
             rpcClient
                 .registerUserProcessor(new SyncUserProcessorAdapter(notifyLeaderChangeHandler));
 
@@ -131,6 +139,7 @@ public class RaftClient {
 
     /**
      * repick leader
+     *
      * @return
      */
     public PeerId refreshLeader() {
@@ -166,6 +175,7 @@ public class RaftClient {
 
     /**
      * get leader
+     *
      * @return
      */
     public PeerId getLeader() {
@@ -178,6 +188,7 @@ public class RaftClient {
 
     /**
      * raft client send request
+     *
      * @param request
      * @return
      */

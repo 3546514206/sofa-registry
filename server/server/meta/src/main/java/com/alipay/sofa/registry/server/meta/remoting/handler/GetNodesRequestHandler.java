@@ -60,4 +60,5 @@ public class GetNodesRequestHandler extends AbstractServerHandler<GetNodesReques
     public Class interest() {
         return GetNodesRequest.class;
     }
+
 }

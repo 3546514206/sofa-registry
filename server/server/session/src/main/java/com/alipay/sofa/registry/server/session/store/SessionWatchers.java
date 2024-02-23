@@ -25,6 +25,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import com.alipay.sofa.registry.common.model.constants.ValueConstants;
 import com.alipay.sofa.registry.common.model.store.Watcher;
 import com.alipay.sofa.registry.common.model.store.WordCache;
 import com.alipay.sofa.registry.log.Logger;
@@ -32,7 +33,6 @@ import com.alipay.sofa.registry.log.LoggerFactory;
 import com.alipay.sofa.registry.util.VersionsMapUtils;
 
 /**
- *
  * @author shangyu.wh
  * @version $Id: SessionWatchers.java, v 0.1 2018-04-17 19:00 shangyu.wh Exp $
  */
@@ -80,6 +80,7 @@ public class SessionWatchers implements Watchers {
             if (existingWatcher != null) {
                 LOGGER.warn("There is watcher already exists,it will be overwrite! {}",
                     existingWatcher);
+                removeConnectIndex(existingWatcher);
             }
 
             watcherMap.put(watcher.getRegisterId(), watcher);
@@ -99,9 +100,13 @@ public class SessionWatchers implements Watchers {
                 for (Iterator it = map.values().iterator(); it.hasNext();) {
                     Watcher watcher = (Watcher) it.next();
                     if (watcher != null
-                        && connectId.equals(watcher.getSourceAddress().getAddressString())) {
+                        && connectId.equals(watcher.getSourceAddress().getAddressString()
+                                            + ValueConstants.CONNECT_ID_SPLIT
+                                            + watcher.getTargetAddress().getAddressString())) {
                         it.remove();
-                        invalidateConnectIndex(watcher.getSourceAddress().getAddressString());
+                        invalidateConnectIndex(watcher.getSourceAddress().getAddressString()
+                                               + ValueConstants.CONNECT_ID_SPLIT
+                                               + watcher.getTargetAddress().getAddressString());
                     }
                 }
             }
@@ -201,7 +206,9 @@ public class SessionWatchers implements Watchers {
     }
 
     private void addConnectIndex(Watcher watcher) {
-        String connectId = watcher.getSourceAddress().getAddressString();
+        String connectId = watcher.getSourceAddress().getAddressString()
+                           + ValueConstants.CONNECT_ID_SPLIT
+                           + watcher.getTargetAddress().getAddressString();
         connectId = WordCache.getInstance().getWordCache(connectId);
 
         Map<String/*registerId*/, Watcher> subscriberMap = connectIndex.get(connectId);
@@ -217,7 +224,9 @@ public class SessionWatchers implements Watchers {
     }
 
     private void removeConnectIndex(Watcher watcher) {
-        String connectId = watcher.getSourceAddress().getAddressString();
+        String connectId = watcher.getSourceAddress().getAddressString()
+                           + ValueConstants.CONNECT_ID_SPLIT
+                           + watcher.getTargetAddress().getAddressString();
         Map<String/*registerId*/, Watcher> subscriberMap = connectIndex.get(connectId);
         if (subscriberMap != null) {
             subscriberMap.remove(watcher.getRegisterId());
@@ -228,6 +237,10 @@ public class SessionWatchers implements Watchers {
 
     private void invalidateConnectIndex(String connectId) {
         connectIndex.remove(connectId);
+    }
+
+    public Map<String /*connectId*/, Map<String /*registerId*/, Watcher>> getConnectWatchers() {
+        return connectIndex;
     }
 
 }

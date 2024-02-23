@@ -36,6 +36,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  *
@@ -48,12 +50,15 @@ public class RaftServerHandler implements ChannelHandler {
 
     protected RaftServer        raftServer;
 
+    private ThreadPoolExecutor  executor;
+
     /**
      * constructor
      * @param raftServer
      */
-    public RaftServerHandler(RaftServer raftServer) {
+    public RaftServerHandler(RaftServer raftServer, ThreadPoolExecutor executor) {
         this.raftServer = raftServer;
+        this.executor = executor;
     }
 
     @Override
@@ -160,4 +165,8 @@ public class RaftServerHandler implements ChannelHandler {
         return InvokeType.ASYNC;
     }
 
+    @Override
+    public Executor getExecutor() {
+        return executor;
+    }
 }

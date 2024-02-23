@@ -20,7 +20,6 @@ import com.alipay.sofa.registry.common.model.ServerDataBox;
 import com.alipay.sofa.registry.common.model.console.PersistenceData;
 import com.alipay.sofa.registry.common.model.metaserver.FetchProvideDataRequest;
 import com.alipay.sofa.registry.common.model.metaserver.ProvideData;
-import com.alipay.sofa.registry.common.model.store.DataInfo;
 import com.alipay.sofa.registry.log.Logger;
 import com.alipay.sofa.registry.log.LoggerFactory;
 import com.alipay.sofa.registry.remoting.Channel;
@@ -31,6 +30,7 @@ import com.alipay.sofa.registry.store.api.annotation.RaftReference;
 
 /**
  * Handle session node's query request, such as get ProvideData by dataInfoId
+ *
  * @author shangyu.wh
  * @version $Id: GetNodesRequestHandler.java, v 0.1 2018-03-02 15:12 shangyu.wh Exp $
  */
@@ -85,4 +85,5 @@ public class FetchProvideDataRequestHandler extends AbstractServerHandler<FetchP
     public Class interest() {
         return FetchProvideDataRequest.class;
     }
+
 }

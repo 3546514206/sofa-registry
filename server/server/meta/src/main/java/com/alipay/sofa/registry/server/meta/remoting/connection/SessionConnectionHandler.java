@@ -75,5 +75,4 @@ public class SessionConnectionHandler extends AbstractServerHandler implements N
     public NodeType getNodeType() {
         return NodeType.SESSION;
     }
-
 }

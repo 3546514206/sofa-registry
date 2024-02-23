@@ -123,7 +123,12 @@ public class DataChangeEventQueue {
      * @param event
      */
     public void onChange(IDataChangeEvent event) {
-        eventQueue.add(event);
+        try {
+            eventQueue.add(event);
+        } catch (Throwable e) {
+            LOGGER.error("Error onChange: " + e.getMessage(), e);
+            throw e;
+        }
     }
 
     /**
@@ -255,8 +260,6 @@ public class DataChangeEventQueue {
                         "[{}] client off handle, connectId={}, occurTimestamp={}, version={}, handle pubSize={}",
                         getName(), connectId, event.getOccurredTimestamp(), event.getVersion(),
                         count);
-            } else {
-                LOGGER.info("[{}] no datum to handle, connectId={}", getName(), connectId);
             }
         }
     }

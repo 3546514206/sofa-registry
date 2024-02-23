@@ -117,11 +117,22 @@ public class DataServerConfig {
 
     private int                sessionServerNotifierRetryExecutorQueueSize  = 10000;
 
+    private int                defaultRequestExecutorMinSize                = 20;
+
+    private int                defaultRequestExecutorMaxSize                = 400;
+
+    private int                defaultRequestExecutorQueueSize              = 600;
+    private long               defaultRequestExecutorKeepAliveTime          = 60;
+
+    private int                logMetricsFixedDelay                         = 30;
+
     private int                renewEnableDelaySec                          = 30;
 
     private int                dataSyncDelayTimeout                         = 1000;
 
     private int                dataSyncNotifyRetry                          = 3;
+
+    private int                sessionDisconnectDelayMs                     = 30000;
 
     /**
      * constructor
@@ -696,7 +707,8 @@ public class DataServerConfig {
                 if (localDataCenter != null && !localDataCenter.isEmpty()) {
                     Collection<String> metas = metaMap.get(localDataCenter);
                     if (metas != null && !metas.isEmpty()) {
-                        metaIps = metas.stream().map(NetUtil::getIPAddressFromDomain).collect(Collectors.toSet());
+                        metaIps = metas.stream().map(NetUtil::getIPAddressFromDomain)
+                            .collect(Collectors.toSet());
                     }
                 }
             }
@@ -848,9 +860,67 @@ public class DataServerConfig {
         this.dataSyncNotifyRetry = dataSyncNotifyRetry;
     }
 
+    /**
+     * Getter method for property <tt>sessionDisconnectDelayMs</tt>.
+     *
+     * @return property value of sessionDisconnectDelayMs
+     */
+    public int getSessionDisconnectDelayMs() {
+        return sessionDisconnectDelayMs;
+    }
+
+    /**
+     * Setter method for property <tt>sessionDisconnectDelayMs</tt>.
+     *
+     * @param sessionDisconnectDelayMs value to be assigned to property sessionDisconnectDelayMs
+     */
+    public void setSessionDisconnectDelayMs(int sessionDisconnectDelayMs) {
+        this.sessionDisconnectDelayMs = sessionDisconnectDelayMs;
+    }
+
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
+    }
+
+    public int getDefaultRequestExecutorMinSize() {
+        return defaultRequestExecutorMinSize;
+    }
+
+    public void setDefaultRequestExecutorMinSize(int defaultRequestExecutorMinSize) {
+        this.defaultRequestExecutorMinSize = defaultRequestExecutorMinSize;
+    }
+
+    public int getDefaultRequestExecutorMaxSize() {
+        return defaultRequestExecutorMaxSize;
+    }
+
+    public void setDefaultRequestExecutorMaxSize(int defaultRequestExecutorMaxSize) {
+        this.defaultRequestExecutorMaxSize = defaultRequestExecutorMaxSize;
+    }
+
+    public int getDefaultRequestExecutorQueueSize() {
+        return defaultRequestExecutorQueueSize;
+    }
+
+    public void setDefaultRequestExecutorQueueSize(int defaultRequestExecutorQueueSize) {
+        this.defaultRequestExecutorQueueSize = defaultRequestExecutorQueueSize;
+    }
+
+    public long getDefaultRequestExecutorKeepAliveTime() {
+        return defaultRequestExecutorKeepAliveTime;
+    }
+
+    public void setDefaultRequestExecutorKeepAliveTime(long defaultRequestExecutorKeepAliveTime) {
+        this.defaultRequestExecutorKeepAliveTime = defaultRequestExecutorKeepAliveTime;
+    }
+
+    public int getLogMetricsFixedDelay() {
+        return logMetricsFixedDelay;
+    }
+
+    public void setLogMetricsFixedDelay(int logMetricsFixedDelay) {
+        this.logMetricsFixedDelay = logMetricsFixedDelay;
     }
 
 }
