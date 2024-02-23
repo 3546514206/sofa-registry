@@ -119,8 +119,7 @@ public class BlackListProvideDataProcessor implements ProvideDataProcessor {
                 String key = NetUtil.toAddressString(channel.getRemoteAddress());
                 String ip = key.substring(0, key.indexOf(":"));
                 if (_ipList.contains(ip)) {
-                    connections.add(key + ValueConstants.CONNECT_ID_SPLIT
-                                    + NetUtil.toAddressString(channel.getLocalAddress()));
+                    connections.add(key);
                 }
             }
         }

@@ -25,6 +25,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import com.alipay.sofa.registry.common.model.constants.ValueConstants;
 
 /**
+ *
  * @author shangyu.wh
  * @version $Id: MetaServerConfigBean.java, v 0.1 2018-01-16 11:01 shangyu.wh Exp $
  */
@@ -43,7 +44,7 @@ public class MetaServerConfigBean implements MetaServerConfig {
 
     private int                schedulerHeartbeatTimeout                       = 3;
 
-    private int                schedulerHeartbeatFirstDelay                    = 30;
+    private int                schedulerHeartbeatFirstDelay                    = 3;
 
     private int                schedulerHeartbeatExpBackOffBound               = 10;
 
@@ -80,8 +81,6 @@ public class MetaServerConfigBean implements MetaServerConfig {
     private int                receiveStatusConfirmNotifyTaskRetryTimes        = 3;
 
     private int                sessionNodeChangePushTaskRetryTimes             = 3;
-
-    private int                raftElectionTimeout                             = 1000;
 
     /**
      * Whether to enable metrics for node.
@@ -121,24 +120,7 @@ public class MetaServerConfigBean implements MetaServerConfig {
     private int                raftClientRefreshExecutorMaxSize                = 10;
     private int                raftClientRefreshExecutorQueueSize              = 1024;
 
-    private int                defaultRequestExecutorMinSize                   = 20;
-    private int                defaultRequestExecutorMaxSize                   = 600;
-    private int                defaultRequestExecutorQueueSize                 = 500;
-
-    private int                raftExecutorMinSize                             = 20;
-    private int                raftExecutorMaxSize                             = 400;
-    private int                raftExecutorQueueSize                           = 100;
-
-    private int                raftServerExecutorMinSize                       = 20;
-    private int                raftServerExecutorMaxSize                       = 100;
-    private int                raftServerExecutorQueueSize                     = 100;
-
-    private int                raftFsmExecutorMinSize                          = 3;
-    private int                raftFsmExecutorMaxSize                          = 10;
-    private int                raftFsmExecutorQueueSize                        = 100;
-
     private int                metaSchedulerPoolSize                           = 6;
-    private double             sessionLoadbalanceThresholdRatio                = 1.1;
 
     @Override
     public int getSessionServerPort() {
@@ -148,7 +130,7 @@ public class MetaServerConfigBean implements MetaServerConfig {
     /**
      * Setter method for property <tt>sessionServerPort</tt>.
      *
-     * @param sessionServerPort value to be assigned to property sessionServerPort
+     * @param sessionServerPort  value to be assigned to property sessionServerPort
      */
     public void setSessionServerPort(int sessionServerPort) {
         this.sessionServerPort = sessionServerPort;
@@ -162,7 +144,7 @@ public class MetaServerConfigBean implements MetaServerConfig {
     /**
      * Setter method for property <tt>dataServerPort</tt>.
      *
-     * @param dataServerPort value to be assigned to property dataServerPort
+     * @param dataServerPort  value to be assigned to property dataServerPort
      */
     public void setDataServerPort(int dataServerPort) {
         this.dataServerPort = dataServerPort;
@@ -176,7 +158,7 @@ public class MetaServerConfigBean implements MetaServerConfig {
     /**
      * Setter method for property <tt>httpServerPort</tt>.
      *
-     * @param httpServerPort value to be assigned to property httpServerPort
+     * @param httpServerPort  value to be assigned to property httpServerPort
      */
     public void setHttpServerPort(int httpServerPort) {
         this.httpServerPort = httpServerPort;
@@ -195,7 +177,7 @@ public class MetaServerConfigBean implements MetaServerConfig {
     /**
      * Setter method for property <tt>schedulerHeartbeatTimeout</tt>.
      *
-     * @param schedulerHeartbeatTimeout value to be assigned to property schedulerHeartbeatTimeout
+     * @param schedulerHeartbeatTimeout  value to be assigned to property schedulerHeartbeatTimeout
      */
     public void setSchedulerHeartbeatTimeout(int schedulerHeartbeatTimeout) {
         this.schedulerHeartbeatTimeout = schedulerHeartbeatTimeout;
@@ -214,7 +196,7 @@ public class MetaServerConfigBean implements MetaServerConfig {
     /**
      * Setter method for property <tt>schedulerHeartbeatFirstDelay</tt>.
      *
-     * @param schedulerHeartbeatFirstDelay value to be assigned to property schedulerHeartbeatFirstDelay
+     * @param schedulerHeartbeatFirstDelay  value to be assigned to property schedulerHeartbeatFirstDelay
      */
     public void setSchedulerHeartbeatFirstDelay(int schedulerHeartbeatFirstDelay) {
         this.schedulerHeartbeatFirstDelay = schedulerHeartbeatFirstDelay;
@@ -233,7 +215,7 @@ public class MetaServerConfigBean implements MetaServerConfig {
     /**
      * Setter method for property <tt>schedulerHeartbeatExpBackOffBound</tt>.
      *
-     * @param schedulerHeartbeatExpBackOffBound value to be assigned to property schedulerHeartbeatExpBackOffBound
+     * @param schedulerHeartbeatExpBackOffBound  value to be assigned to property schedulerHeartbeatExpBackOffBound
      */
     public void setSchedulerHeartbeatExpBackOffBound(int schedulerHeartbeatExpBackOffBound) {
         this.schedulerHeartbeatExpBackOffBound = schedulerHeartbeatExpBackOffBound;
@@ -247,7 +229,7 @@ public class MetaServerConfigBean implements MetaServerConfig {
     /**
      * Setter method for property <tt>decisionMode</tt>.
      *
-     * @param decisionMode value to be assigned to property decisionMode
+     * @param decisionMode  value to be assigned to property decisionMode
      */
     public void setDecisionMode(DecisionMode decisionMode) {
         this.decisionMode = decisionMode;
@@ -266,7 +248,7 @@ public class MetaServerConfigBean implements MetaServerConfig {
     /**
      * Setter method for property <tt>dataNodeExchangeTimeout</tt>.
      *
-     * @param dataNodeExchangeTimeout value to be assigned to property dataNodeExchangeTimeout
+     * @param dataNodeExchangeTimeout  value to be assigned to property dataNodeExchangeTimeout
      */
     public void setDataNodeExchangeTimeout(int dataNodeExchangeTimeout) {
         this.dataNodeExchangeTimeout = dataNodeExchangeTimeout;
@@ -285,7 +267,7 @@ public class MetaServerConfigBean implements MetaServerConfig {
     /**
      * Setter method for property <tt>sessionNodeExchangeTimeout</tt>.
      *
-     * @param sessionNodeExchangeTimeout value to be assigned to property sessionNodeExchangeTimeout
+     * @param sessionNodeExchangeTimeout  value to be assigned to property sessionNodeExchangeTimeout
      */
     public void setSessionNodeExchangeTimeout(int sessionNodeExchangeTimeout) {
         this.sessionNodeExchangeTimeout = sessionNodeExchangeTimeout;
@@ -304,7 +286,7 @@ public class MetaServerConfigBean implements MetaServerConfig {
     /**
      * Setter method for property <tt>schedulerConnectMetaServerTimeout</tt>.
      *
-     * @param schedulerConnectMetaServerTimeout value to be assigned to property schedulerConnectMetaServerTimeout
+     * @param schedulerConnectMetaServerTimeout  value to be assigned to property schedulerConnectMetaServerTimeout
      */
     public void setSchedulerConnectMetaServerTimeout(int schedulerConnectMetaServerTimeout) {
         this.schedulerConnectMetaServerTimeout = schedulerConnectMetaServerTimeout;
@@ -323,7 +305,7 @@ public class MetaServerConfigBean implements MetaServerConfig {
     /**
      * Setter method for property <tt>schedulerConnectMetaServerFirstDelay</tt>.
      *
-     * @param schedulerConnectMetaServerFirstDelay value to be assigned to property schedulerConnectMetaServerFirstDelay
+     * @param schedulerConnectMetaServerFirstDelay  value to be assigned to property schedulerConnectMetaServerFirstDelay
      */
     public void setSchedulerConnectMetaServerFirstDelay(int schedulerConnectMetaServerFirstDelay) {
         this.schedulerConnectMetaServerFirstDelay = schedulerConnectMetaServerFirstDelay;
@@ -342,7 +324,7 @@ public class MetaServerConfigBean implements MetaServerConfig {
     /**
      * Setter method for property <tt>schedulerConnectMetaServerExpBackOffBound</tt>.
      *
-     * @param schedulerConnectMetaServerExpBackOffBound value to be assigned to property schedulerConnectMetaServerExpBackOffBound
+     * @param schedulerConnectMetaServerExpBackOffBound  value to be assigned to property schedulerConnectMetaServerExpBackOffBound
      */
     public void setSchedulerConnectMetaServerExpBackOffBound(int schedulerConnectMetaServerExpBackOffBound) {
         this.schedulerConnectMetaServerExpBackOffBound = schedulerConnectMetaServerExpBackOffBound;
@@ -361,7 +343,7 @@ public class MetaServerConfigBean implements MetaServerConfig {
     /**
      * Setter method for property <tt>metaServerPort</tt>.
      *
-     * @param metaServerPort value to be assigned to property metaServerPort
+     * @param metaServerPort  value to be assigned to property metaServerPort
      */
     public void setMetaServerPort(int metaServerPort) {
         this.metaServerPort = metaServerPort;
@@ -380,7 +362,7 @@ public class MetaServerConfigBean implements MetaServerConfig {
     /**
      * Setter method for property <tt>metaNodeExchangeTimeout</tt>.
      *
-     * @param metaNodeExchangeTimeout value to be assigned to property metaNodeExchangeTimeout
+     * @param metaNodeExchangeTimeout  value to be assigned to property metaNodeExchangeTimeout
      */
     public void setMetaNodeExchangeTimeout(int metaNodeExchangeTimeout) {
         this.metaNodeExchangeTimeout = metaNodeExchangeTimeout;
@@ -399,7 +381,7 @@ public class MetaServerConfigBean implements MetaServerConfig {
     /**
      * Setter method for property <tt>dataCenterChangeNotifyTaskRetryTimes</tt>.
      *
-     * @param dataCenterChangeNotifyTaskRetryTimes value to be assigned to property dataCenterChangeNotifyTaskRetryTimes
+     * @param dataCenterChangeNotifyTaskRetryTimes  value to be assigned to property dataCenterChangeNotifyTaskRetryTimes
      */
     public void setDataCenterChangeNotifyTaskRetryTimes(int dataCenterChangeNotifyTaskRetryTimes) {
         this.dataCenterChangeNotifyTaskRetryTimes = dataCenterChangeNotifyTaskRetryTimes;
@@ -418,7 +400,7 @@ public class MetaServerConfigBean implements MetaServerConfig {
     /**
      * Setter method for property <tt>dataNodeChangePushTaskRetryTimes</tt>.
      *
-     * @param dataNodeChangePushTaskRetryTimes value to be assigned to property dataNodeChangePushTaskRetryTimes
+     * @param dataNodeChangePushTaskRetryTimes  value to be assigned to property dataNodeChangePushTaskRetryTimes
      */
     public void setDataNodeChangePushTaskRetryTimes(int dataNodeChangePushTaskRetryTimes) {
         this.dataNodeChangePushTaskRetryTimes = dataNodeChangePushTaskRetryTimes;
@@ -437,7 +419,7 @@ public class MetaServerConfigBean implements MetaServerConfig {
     /**
      * Setter method for property <tt>getDataCenterChangeListTaskRetryTimes</tt>.
      *
-     * @param getDataCenterChangeListTaskRetryTimes value to be assigned to property getDataCenterChangeListTaskRetryTimes
+     * @param getDataCenterChangeListTaskRetryTimes  value to be assigned to property getDataCenterChangeListTaskRetryTimes
      */
     public void setGetDataCenterChangeListTaskRetryTimes(int getDataCenterChangeListTaskRetryTimes) {
         this.getDataCenterChangeListTaskRetryTimes = getDataCenterChangeListTaskRetryTimes;
@@ -456,7 +438,7 @@ public class MetaServerConfigBean implements MetaServerConfig {
     /**
      * Setter method for property <tt>receiveStatusConfirmNotifyTaskRetryTimes</tt>.
      *
-     * @param receiveStatusConfirmNotifyTaskRetryTimes value to be assigned to property receiveStatusConfirmNotifyTaskRetryTimes
+     * @param receiveStatusConfirmNotifyTaskRetryTimes  value to be assigned to property receiveStatusConfirmNotifyTaskRetryTimes
      */
     public void setReceiveStatusConfirmNotifyTaskRetryTimes(int receiveStatusConfirmNotifyTaskRetryTimes) {
         this.receiveStatusConfirmNotifyTaskRetryTimes = receiveStatusConfirmNotifyTaskRetryTimes;
@@ -475,7 +457,7 @@ public class MetaServerConfigBean implements MetaServerConfig {
     /**
      * Setter method for property <tt>sessionNodeChangePushTaskRetryTimes</tt>.
      *
-     * @param sessionNodeChangePushTaskRetryTimes value to be assigned to property sessionNodeChangePushTaskRetryTimes
+     * @param sessionNodeChangePushTaskRetryTimes  value to be assigned to property sessionNodeChangePushTaskRetryTimes
      */
     public void setSessionNodeChangePushTaskRetryTimes(int sessionNodeChangePushTaskRetryTimes) {
         this.sessionNodeChangePushTaskRetryTimes = sessionNodeChangePushTaskRetryTimes;
@@ -494,7 +476,7 @@ public class MetaServerConfigBean implements MetaServerConfig {
     /**
      * Setter method for property <tt>schedulerCheckNodeListChangePushTimeout</tt>.
      *
-     * @param schedulerCheckNodeListChangePushTimeout value to be assigned to property schedulerCheckNodeListChangePushTimeout
+     * @param schedulerCheckNodeListChangePushTimeout  value to be assigned to property schedulerCheckNodeListChangePushTimeout
      */
     public void setSchedulerCheckNodeListChangePushTimeout(int schedulerCheckNodeListChangePushTimeout) {
         this.schedulerCheckNodeListChangePushTimeout = schedulerCheckNodeListChangePushTimeout;
@@ -513,7 +495,7 @@ public class MetaServerConfigBean implements MetaServerConfig {
     /**
      * Setter method for property <tt>schedulerCheckNodeListChangePushFirstDelay</tt>.
      *
-     * @param schedulerCheckNodeListChangePushFirstDelay value to be assigned to property schedulerCheckNodeListChangePushFirstDelay
+     * @param schedulerCheckNodeListChangePushFirstDelay  value to be assigned to property schedulerCheckNodeListChangePushFirstDelay
      */
     public void setSchedulerCheckNodeListChangePushFirstDelay(int schedulerCheckNodeListChangePushFirstDelay) {
         this.schedulerCheckNodeListChangePushFirstDelay = schedulerCheckNodeListChangePushFirstDelay;
@@ -532,8 +514,8 @@ public class MetaServerConfigBean implements MetaServerConfig {
     /**
      * Setter method for property <tt>schedulerCheckNodeListChangePushExpBackOffBound</tt>.
      *
-     * @param schedulerCheckNodeListChangePushExpBackOffBound value to be assigned to property
-     *                                                        schedulerCheckNodeListChangePushExpBackOffBound
+     * @param schedulerCheckNodeListChangePushExpBackOffBound  value to be assigned to property
+     *                                                         schedulerCheckNodeListChangePushExpBackOffBound
      */
     public void setSchedulerCheckNodeListChangePushExpBackOffBound(int schedulerCheckNodeListChangePushExpBackOffBound) {
         this.schedulerCheckNodeListChangePushExpBackOffBound = schedulerCheckNodeListChangePushExpBackOffBound;
@@ -552,7 +534,7 @@ public class MetaServerConfigBean implements MetaServerConfig {
     /**
      * Setter method for property <tt>schedulerGetDataChangeTimeout</tt>.
      *
-     * @param schedulerGetDataChangeTimeout value to be assigned to property schedulerGetDataChangeTimeout
+     * @param schedulerGetDataChangeTimeout  value to be assigned to property schedulerGetDataChangeTimeout
      */
     public void setSchedulerGetDataChangeTimeout(int schedulerGetDataChangeTimeout) {
         this.schedulerGetDataChangeTimeout = schedulerGetDataChangeTimeout;
@@ -571,7 +553,7 @@ public class MetaServerConfigBean implements MetaServerConfig {
     /**
      * Setter method for property <tt>schedulerGetDataChangeFirstDelay</tt>.
      *
-     * @param schedulerGetDataChangeFirstDelay value to be assigned to property schedulerGetDataChangeFirstDelay
+     * @param schedulerGetDataChangeFirstDelay  value to be assigned to property schedulerGetDataChangeFirstDelay
      */
     public void setSchedulerGetDataChangeFirstDelay(int schedulerGetDataChangeFirstDelay) {
         this.schedulerGetDataChangeFirstDelay = schedulerGetDataChangeFirstDelay;
@@ -590,7 +572,7 @@ public class MetaServerConfigBean implements MetaServerConfig {
     /**
      * Setter method for property <tt>schedulerGetDataChangeExpBackOffBound</tt>.
      *
-     * @param schedulerGetDataChangeExpBackOffBound value to be assigned to property schedulerGetDataChangeExpBackOffBound
+     * @param schedulerGetDataChangeExpBackOffBound  value to be assigned to property schedulerGetDataChangeExpBackOffBound
      */
     public void setSchedulerGetDataChangeExpBackOffBound(int schedulerGetDataChangeExpBackOffBound) {
         this.schedulerGetDataChangeExpBackOffBound = schedulerGetDataChangeExpBackOffBound;
@@ -629,7 +611,7 @@ public class MetaServerConfigBean implements MetaServerConfig {
     /**
      * Setter method for property <tt>raftDataPath</tt>.
      *
-     * @param raftDataPath value to be assigned to property raftDataPath
+     * @param raftDataPath  value to be assigned to property raftDataPath
      */
     public void setRaftDataPath(String raftDataPath) {
         this.raftDataPath = raftDataPath;
@@ -643,7 +625,7 @@ public class MetaServerConfigBean implements MetaServerConfig {
     /**
      * Setter method for property <tt>enableMetrics</tt>.
      *
-     * @param enableMetrics value to be assigned to property enableMetrics
+     * @param enableMetrics  value to be assigned to property enableMetrics
      */
     public void setEnableMetrics(boolean enableMetrics) {
         this.enableMetrics = enableMetrics;
@@ -661,7 +643,7 @@ public class MetaServerConfigBean implements MetaServerConfig {
     /**
      * Setter method for property <tt>RockDBCacheSize</tt>.
      *
-     * @param rockDBCacheSize value to be assigned to property RockDBCacheSize
+     * @param rockDBCacheSize  value to be assigned to property RockDBCacheSize
      */
     public void setRockDBCacheSize(int rockDBCacheSize) {
         this.rockDBCacheSize = rockDBCacheSize;
@@ -850,7 +832,7 @@ public class MetaServerConfigBean implements MetaServerConfig {
     /**
      * Setter method for property <tt>metaSchedulerPoolSize </tt>.
      *
-     * @param metaSchedulerPoolSize value to be assigned to property metaSchedulerPoolSize
+     * @param metaSchedulerPoolSize  value to be assigned to property metaSchedulerPoolSize
      */
     public void setMetaSchedulerPoolSize(int metaSchedulerPoolSize) {
         this.metaSchedulerPoolSize = metaSchedulerPoolSize;
@@ -864,121 +846,5 @@ public class MetaServerConfigBean implements MetaServerConfig {
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
-    }
-
-    public int getDefaultRequestExecutorMinSize() {
-        return defaultRequestExecutorMinSize;
-    }
-
-    public void setDefaultRequestExecutorMinSize(int defaultRequestExecutorMinSize) {
-        this.defaultRequestExecutorMinSize = defaultRequestExecutorMinSize;
-    }
-
-    public int getDefaultRequestExecutorMaxSize() {
-        return defaultRequestExecutorMaxSize;
-    }
-
-    public void setDefaultRequestExecutorMaxSize(int defaultRequestExecutorMaxSize) {
-        this.defaultRequestExecutorMaxSize = defaultRequestExecutorMaxSize;
-    }
-
-    public int getDefaultRequestExecutorQueueSize() {
-        return defaultRequestExecutorQueueSize;
-    }
-
-    public void setDefaultRequestExecutorQueueSize(int defaultRequestExecutorQueueSize) {
-        this.defaultRequestExecutorQueueSize = defaultRequestExecutorQueueSize;
-    }
-
-    public int getRaftExecutorMinSize() {
-        return raftExecutorMinSize;
-    }
-
-    public void setRaftExecutorMinSize(int raftExecutorMinSize) {
-        this.raftExecutorMinSize = raftExecutorMinSize;
-    }
-
-    public int getRaftExecutorMaxSize() {
-        return raftExecutorMaxSize;
-    }
-
-    public void setRaftExecutorMaxSize(int raftExecutorMaxSize) {
-        this.raftExecutorMaxSize = raftExecutorMaxSize;
-    }
-
-    public int getRaftExecutorQueueSize() {
-        return raftExecutorQueueSize;
-    }
-
-    public void setRaftExecutorQueueSize(int raftExecutorQueueSize) {
-        this.raftExecutorQueueSize = raftExecutorQueueSize;
-    }
-
-    public int getRaftServerExecutorMinSize() {
-        return raftServerExecutorMinSize;
-    }
-
-    public void setRaftServerExecutorMinSize(int raftServerExecutorMinSize) {
-        this.raftServerExecutorMinSize = raftServerExecutorMinSize;
-    }
-
-    public int getRaftServerExecutorMaxSize() {
-        return raftServerExecutorMaxSize;
-    }
-
-    public void setRaftServerExecutorMaxSize(int raftServerExecutorMaxSize) {
-        this.raftServerExecutorMaxSize = raftServerExecutorMaxSize;
-    }
-
-    public int getRaftServerExecutorQueueSize() {
-        return raftServerExecutorQueueSize;
-    }
-
-    public void setRaftServerExecutorQueueSize(int raftServerExecutorQueueSize) {
-        this.raftServerExecutorQueueSize = raftServerExecutorQueueSize;
-    }
-
-    @Override
-    public int getRaftFsmExecutorMinSize() {
-        return raftFsmExecutorMinSize;
-    }
-
-    public void setRaftFsmExecutorMinSize(int raftFsmExecutorMinSize) {
-        this.raftFsmExecutorMinSize = raftFsmExecutorMinSize;
-    }
-
-    @Override
-    public int getRaftFsmExecutorMaxSize() {
-        return raftFsmExecutorMaxSize;
-    }
-
-    public void setRaftFsmExecutorMaxSize(int raftFsmExecutorMaxSize) {
-        this.raftFsmExecutorMaxSize = raftFsmExecutorMaxSize;
-    }
-
-    @Override
-    public int getRaftFsmExecutorQueueSize() {
-        return raftFsmExecutorQueueSize;
-    }
-
-    public void setRaftFsmExecutorQueueSize(int raftFsmExecutorQueueSize) {
-        this.raftFsmExecutorQueueSize = raftFsmExecutorQueueSize;
-    }
-
-    public int getRaftElectionTimeout() {
-        return raftElectionTimeout;
-    }
-
-    public void setRaftElectionTimeout(int raftElectionTimeout) {
-        this.raftElectionTimeout = raftElectionTimeout;
-    }
-
-    @Override
-    public double getSessionLoadbalanceThresholdRatio() {
-        return sessionLoadbalanceThresholdRatio;
-    }
-
-    public void setSessionLoadbalanceThresholdRatio(double sessionLoadbalanceThresholdRatio) {
-        this.sessionLoadbalanceThresholdRatio = sessionLoadbalanceThresholdRatio;
     }
 }

@@ -24,13 +24,13 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import com.alipay.sofa.registry.common.model.constants.ValueConstants;
 import com.alipay.sofa.registry.common.model.store.Publisher;
 import com.alipay.sofa.registry.common.model.store.WordCache;
 import com.alipay.sofa.registry.log.Logger;
 import com.alipay.sofa.registry.log.LoggerFactory;
 
 /**
+ *
  * @author shangyu.wh
  * @version $Id: SessionDataStore.java, v 0.1 2017-12-01 18:14 shangyu.wh Exp $
  */
@@ -69,6 +69,7 @@ public class SessionDataStore implements DataStore {
             Publisher existingPublisher = publishers.get(publisher.getRegisterId());
 
             if (existingPublisher != null) {
+
                 if (existingPublisher.getVersion() != null) {
                     long oldVersion = existingPublisher.getVersion();
                     Long newVersion = publisher.getVersion();
@@ -102,9 +103,9 @@ public class SessionDataStore implements DataStore {
                     .warn(
                         "There is publisher already exists,version:{},it will be overwrite!Input version:{},info:{}",
                         existingPublisher.getVersion(), publisher.getVersion(), existingPublisher);
-                removeFromConnectIndex(existingPublisher);
             }
             publishers.put(publisher.getRegisterId(), publisher);
+
             addToConnectIndex(publisher);
 
         } finally {
@@ -155,10 +156,7 @@ public class SessionDataStore implements DataStore {
                 for (Iterator it = map.values().iterator(); it.hasNext();) {
                     Publisher publisher = (Publisher) it.next();
                     if (publisher != null
-                        && connectId.equals(WordCache.getInstance().getWordCache(
-                            publisher.getSourceAddress().getAddressString()
-                                    + ValueConstants.CONNECT_ID_SPLIT
-                                    + publisher.getTargetAddress().getAddressString()))) {
+                        && connectId.equals(publisher.getSourceAddress().getAddressString())) {
                         it.remove();
                     }
                 }
@@ -214,8 +212,7 @@ public class SessionDataStore implements DataStore {
 
     private void addToConnectIndex(Publisher publisher) {
         String connectId = WordCache.getInstance().getWordCache(
-            publisher.getSourceAddress().getAddressString() + ValueConstants.CONNECT_ID_SPLIT
-                    + publisher.getTargetAddress().getAddressString());
+            publisher.getSourceAddress().getAddressString());
 
         Map<String/*registerId*/, Publisher> publisherMap = connectIndex.get(connectId);
         if (publisherMap == null) {
@@ -230,9 +227,7 @@ public class SessionDataStore implements DataStore {
     }
 
     private void removeFromConnectIndex(Publisher publisher) {
-        String connectId = WordCache.getInstance().getWordCache(
-            publisher.getSourceAddress().getAddressString() + ValueConstants.CONNECT_ID_SPLIT
-                    + publisher.getTargetAddress().getAddressString());
+        String connectId = publisher.getSourceAddress().getAddressString();
         Map<String/*registerId*/, Publisher> publisherMap = connectIndex.get(connectId);
         if (publisherMap != null) {
             publisherMap.remove(publisher.getRegisterId());

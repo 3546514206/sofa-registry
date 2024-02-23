@@ -24,6 +24,7 @@ import com.alipay.sofa.jraft.entity.LeaderChangeContext;
 import com.alipay.sofa.jraft.error.RaftError;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotReader;
 import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
+import com.alipay.sofa.jraft.util.Utils;
 import com.alipay.sofa.registry.jraft.command.ProcessRequest;
 import com.alipay.sofa.registry.jraft.command.ProcessResponse;
 import com.alipay.sofa.registry.jraft.processor.FollowerProcessListener;
@@ -45,7 +46,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -63,8 +63,6 @@ public class ServiceStateMachine extends StateMachineAdapter {
     private FollowerProcessListener             followerProcessListener;
 
     private static volatile ServiceStateMachine instance;
-
-    private ThreadPoolExecutor                  executor;
 
     /**
      * get instance of ServiceStateMachine
@@ -155,7 +153,7 @@ public class ServiceStateMachine extends StateMachineAdapter {
                 }
             });
         }
-        this.executor.execute(() -> {
+        Utils.runInThread(() -> {
             String errors = null;
             outer:
             for (Map.Entry<String, SnapshotProcess> entry : snapshotProcessors.entrySet()) {
@@ -233,7 +231,7 @@ public class ServiceStateMachine extends StateMachineAdapter {
     public void onLeaderStart(long term) {
         this.leaderTerm.set(term);
         if (leaderProcessListener != null) {
-            this.executor.execute(() -> leaderProcessListener.startProcess());
+            Utils.runInThread(() -> leaderProcessListener.startProcess());
         }
         super.onLeaderStart(term);
     }
@@ -242,7 +240,7 @@ public class ServiceStateMachine extends StateMachineAdapter {
     public void onLeaderStop(Status status) {
         this.leaderTerm.set(-1);
         if (leaderProcessListener != null) {
-            this.executor.execute(() -> leaderProcessListener.stopProcess());
+            Utils.runInThread(() -> leaderProcessListener.stopProcess());
         }
         super.onLeaderStop(status);
     }
@@ -252,7 +250,7 @@ public class ServiceStateMachine extends StateMachineAdapter {
 
         this.followerTerm.set(-1);
         if (followerProcessListener != null) {
-            this.executor.execute(() -> followerProcessListener.stopProcess(ctx.getLeaderId()));
+            Utils.runInThread(() -> followerProcessListener.stopProcess(ctx.getLeaderId()));
         }
         super.onStopFollowing(ctx);
     }
@@ -262,7 +260,7 @@ public class ServiceStateMachine extends StateMachineAdapter {
 
         this.followerTerm.set(1);
         if (followerProcessListener != null) {
-            this.executor.execute(() -> followerProcessListener.startProcess(ctx.getLeaderId()));
+            Utils.runInThread(() -> followerProcessListener.startProcess(ctx.getLeaderId()));
         }
         super.onStartFollowing(ctx);
     }
@@ -283,9 +281,5 @@ public class ServiceStateMachine extends StateMachineAdapter {
      */
     public void setFollowerProcessListener(FollowerProcessListener followerProcessListener) {
         this.followerProcessListener = followerProcessListener;
-    }
-
-    public void setExecutor(ThreadPoolExecutor executor) {
-        this.executor = executor;
     }
 }

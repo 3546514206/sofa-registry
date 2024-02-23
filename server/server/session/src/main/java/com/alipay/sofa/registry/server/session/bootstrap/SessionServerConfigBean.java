@@ -49,7 +49,7 @@ public class SessionServerConfigBean implements SessionServerConfig {
 
     private int                schedulerHeartbeatFirstDelay            = 3;
 
-    private int                schedulerHeartbeatExpBackOffBound       = 1;
+    private int                schedulerHeartbeatExpBackOffBound       = 10;
 
     private int                schedulerGetSessionNodeTimeout          = 3;
 
@@ -207,14 +207,6 @@ public class SessionServerConfigBean implements SessionServerConfig {
 
     private long               publishDataExecutorKeepAliveTime        = 60;
 
-    private int                defaultRequestExecutorMinPoolSize       = 20;
-
-    private int                defaultRequestExecutorMaxPoolSize       = 400;
-
-    private int                defaultRequestExecutorQueueSize         = 600;
-
-    private long               defaultRequestExecutorKeepAliveTime     = 60;
-
     private double             accessLimitRate                         = 100000.0;
 
     private String             sessionServerRegion;
@@ -223,7 +215,7 @@ public class SessionServerConfigBean implements SessionServerConfig {
 
     private boolean            stopPushSwitch                          = false;
 
-    private boolean            beginDataFetchTask                      = true;
+    private boolean            beginDataFetchTask                      = false;
 
     //begin config for enterprise version
 
@@ -251,8 +243,6 @@ public class SessionServerConfigBean implements SessionServerConfig {
     private int                dataClientConnNum                       = 10;
 
     private int                sessionSchedulerPoolSize                = 6;
-
-    private boolean            enableSessionLoadbalancePolicy          = false;
 
     //end config for enterprise version
 
@@ -2141,45 +2131,5 @@ public class SessionServerConfigBean implements SessionServerConfig {
     @Override
     public String toString() {
         return ToStringBuilder.reflectionToString(this, ToStringStyle.MULTI_LINE_STYLE);
-    }
-
-    public boolean isEnableSessionLoadbalancePolicy() {
-        return enableSessionLoadbalancePolicy;
-    }
-
-    public void setEnableSessionLoadbalancePolicy(boolean enableSessionLoadbalancePolicy) {
-        this.enableSessionLoadbalancePolicy = enableSessionLoadbalancePolicy;
-    }
-
-    public int getDefaultRequestExecutorMinPoolSize() {
-        return defaultRequestExecutorMinPoolSize;
-    }
-
-    public void setDefaultRequestExecutorMinPoolSize(int defaultRequestExecutorMinPoolSize) {
-        this.defaultRequestExecutorMinPoolSize = defaultRequestExecutorMinPoolSize;
-    }
-
-    public int getDefaultRequestExecutorMaxPoolSize() {
-        return defaultRequestExecutorMaxPoolSize;
-    }
-
-    public void setDefaultRequestExecutorMaxPoolSize(int defaultRequestExecutorMaxPoolSize) {
-        this.defaultRequestExecutorMaxPoolSize = defaultRequestExecutorMaxPoolSize;
-    }
-
-    public int getDefaultRequestExecutorQueueSize() {
-        return defaultRequestExecutorQueueSize;
-    }
-
-    public void setDefaultRequestExecutorQueueSize(int defaultRequestExecutorQueueSize) {
-        this.defaultRequestExecutorQueueSize = defaultRequestExecutorQueueSize;
-    }
-
-    public long getDefaultRequestExecutorKeepAliveTime() {
-        return defaultRequestExecutorKeepAliveTime;
-    }
-
-    public void setDefaultRequestExecutorKeepAliveTime(long defaultRequestExecutorKeepAliveTime) {
-        this.defaultRequestExecutorKeepAliveTime = defaultRequestExecutorKeepAliveTime;
     }
 }

@@ -19,7 +19,6 @@ package com.alipay.sofa.registry.server.data.remoting.sessionserver.handler;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import com.alipay.sofa.registry.common.model.constants.ValueConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.alipay.sofa.registry.common.model.CommonResponse;
@@ -100,8 +99,7 @@ public class PublishDataHandler extends AbstractServerHandler<PublishDataRequest
 
         if (publisher.getPublishType() != PublishType.TEMPORARY) {
             String connectId = WordCache.getInstance().getWordCache(
-                publisher.getSourceAddress().getAddressString() + ValueConstants.CONNECT_ID_SPLIT
-                        + publisher.getTargetAddress().getAddressString());
+                publisher.getSourceAddress().getAddressString());
             sessionServerConnectionFactory.registerConnectId(request.getSessionServerProcessId(),
                 connectId);
             // record the renew timestamp

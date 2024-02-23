@@ -27,7 +27,6 @@ import java.util.concurrent.TimeUnit;
 
 import com.alipay.sofa.registry.log.Logger;
 import com.alipay.sofa.registry.log.LoggerFactory;
-import com.alipay.sofa.registry.server.data.util.DataMetricsThreadPoolExecutor;
 import com.alipay.sofa.registry.util.NamedThreadFactory;
 
 /**
@@ -44,8 +43,8 @@ public class ExecutorFactory {
 
     static {
         BlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<>(10);
-        EXECUTOR = new DataMetricsThreadPoolExecutor("CommonExecutor", 20, 300, 1, TimeUnit.HOURS,
-            workQueue, new NamedThreadFactory("CommonExecutor")) {
+        EXECUTOR = new ThreadPoolExecutor(20, 300, 1, TimeUnit.HOURS, workQueue,
+            new NamedThreadFactory("CommonExecutor")) {
 
             /**
              * @see ThreadPoolExecutor#afterExecute(Runnable, Throwable)
@@ -60,11 +59,9 @@ public class ExecutorFactory {
             }
         };
 
-        NOTIFY_SESSION_CALLBACK_EXECUTOR = new DataMetricsThreadPoolExecutor(
-            "NotifySessionCallbackExecutor", 10, 20, 300, TimeUnit.SECONDS,
+        NOTIFY_SESSION_CALLBACK_EXECUTOR = new ThreadPoolExecutor(10, 20, 300, TimeUnit.SECONDS,
             new LinkedBlockingQueue<>(100000), new NamedThreadFactory(
-                "NotifySessionCallbackExecutor", true));
-
+                "NotifySessionCallback-executor", true));
     }
 
     /**

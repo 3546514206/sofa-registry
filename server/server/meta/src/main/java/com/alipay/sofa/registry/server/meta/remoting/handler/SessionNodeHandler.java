@@ -58,5 +58,4 @@ public class SessionNodeHandler extends AbstractServerHandler<SessionNode> {
     public HandlerType getType() {
         return HandlerType.PROCESSER;
     }
-
 }

@@ -17,7 +17,6 @@
 package com.alipay.sofa.registry.server.meta.registry;
 
 import java.util.List;
-import java.util.Map;
 
 import com.alipay.sofa.registry.common.model.Node;
 import com.alipay.sofa.registry.common.model.Node.NodeType;
@@ -25,6 +24,7 @@ import com.alipay.sofa.registry.common.model.metaserver.DataCenterNodes;
 import com.alipay.sofa.registry.common.model.metaserver.NodeChangeResult;
 
 /**
+ *
  * @author shangyu.wh
  * @version $Id: Registry.java, v 0.1 2018-01-11 17:18 shangyu.wh Exp $
  */
@@ -41,9 +41,8 @@ public interface Registry<T extends Node> {
     /**
      * register new node
      * one node unique id by connectId "ip:port"
-     *
-     * @param node
      * @return return dataList
+     * @param node
      */
     NodeChangeResult register(T node);
 
@@ -61,21 +60,18 @@ public interface Registry<T extends Node> {
 
     /**
      * renew node expire time
-     *
      * @param node
      */
     void renew(T node, int duration);
 
     /**
      * get other dataCenter Nodes change scheduled
-     *
      * @param nodeType
      */
     void getOtherDataCenterNodeAndUpdate(NodeType nodeType);
 
     /**
      * get DataCenter Nodes list contains version
-     *
      * @param nodeType
      * @return
      */
@@ -83,7 +79,6 @@ public interface Registry<T extends Node> {
 
     /**
      * get all dataCenter Node list by NodeType
-     *
      * @param nodeType
      * @return
      */
@@ -93,9 +88,4 @@ public interface Registry<T extends Node> {
      * push node change result
      */
     void pushNodeListChange(NodeType nodeType);
-
-    /**
-     * fetch session metrics and config load balancer
-     */
-    Map<String /*category*/, Map<String /*zone*/, Map<String /*address*/, Integer /*connections*/>>> sessionLoadbalance(int maxDisconnect);
 }

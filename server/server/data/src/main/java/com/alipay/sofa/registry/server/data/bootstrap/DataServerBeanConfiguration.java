@@ -23,7 +23,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import com.alipay.sofa.registry.server.data.remoting.dataserver.task.LogMetricsTask;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -102,7 +101,7 @@ import com.alipay.sofa.registry.server.data.renew.DatumLeaseManager;
 import com.alipay.sofa.registry.server.data.renew.LocalDataServerCleanHandler;
 import com.alipay.sofa.registry.server.data.resource.DataDigestResource;
 import com.alipay.sofa.registry.server.data.resource.HealthResource;
-import com.alipay.sofa.registry.server.data.util.DataMetricsThreadPoolExecutor;
+import com.alipay.sofa.registry.server.data.util.ThreadPoolExecutorDataServer;
 import com.alipay.sofa.registry.util.NamedThreadFactory;
 import com.alipay.sofa.registry.util.PropertySplitter;
 
@@ -419,7 +418,6 @@ public class DataServerBeanConfiguration {
             list.add(sessionServerNotifier());
             list.add(tempPublisherNotifier());
             list.add(backUpNotifier());
-            list.add(snapshotBackUpNotifier());
             return list;
         }
 
@@ -513,18 +511,12 @@ public class DataServerBeanConfiguration {
             return new RenewNodeTask();
         }
 
-        @Bean
-        public LogMetricsTask logMetricsTask() {
-            return new LogMetricsTask();
-        }
-
         @Bean(name = "tasks")
         public List<AbstractTask> tasks() {
             List<AbstractTask> list = new ArrayList<>();
             list.add(connectionRefreshTask());
             list.add(connectionRefreshMetaTask());
             list.add(renewNodeTask());
-            list.add(logMetricsTask());
             return list;
         }
 
@@ -563,7 +555,7 @@ public class DataServerBeanConfiguration {
 
         @Bean(name = "publishProcessorExecutor")
         public ThreadPoolExecutor publishProcessorExecutor(DataServerConfig dataServerConfig) {
-            return new DataMetricsThreadPoolExecutor("PublishProcessorExecutor",
+            return new ThreadPoolExecutorDataServer("PublishProcessorExecutor",
                 dataServerConfig.getPublishExecutorMinPoolSize(),
                 dataServerConfig.getPublishExecutorMaxPoolSize(), 300, TimeUnit.SECONDS,
                 new ArrayBlockingQueue<>(dataServerConfig.getPublishExecutorQueueSize()),
@@ -572,7 +564,7 @@ public class DataServerBeanConfiguration {
 
         @Bean(name = "renewDatumProcessorExecutor")
         public ThreadPoolExecutor renewDatumProcessorExecutor(DataServerConfig dataServerConfig) {
-            return new DataMetricsThreadPoolExecutor("RenewDatumProcessorExecutor",
+            return new ThreadPoolExecutorDataServer("RenewDatumProcessorExecutor",
                 dataServerConfig.getRenewDatumExecutorMinPoolSize(),
                 dataServerConfig.getRenewDatumExecutorMaxPoolSize(), 300, TimeUnit.SECONDS,
                 new ArrayBlockingQueue<>(dataServerConfig.getRenewDatumExecutorQueueSize()),
@@ -581,7 +573,7 @@ public class DataServerBeanConfiguration {
 
         @Bean(name = "getDataProcessorExecutor")
         public ThreadPoolExecutor getDataProcessorExecutor(DataServerConfig dataServerConfig) {
-            return new DataMetricsThreadPoolExecutor("GetDataProcessorExecutor",
+            return new ThreadPoolExecutorDataServer("GetDataProcessorExecutor",
                 dataServerConfig.getGetDataExecutorMinPoolSize(),
                 dataServerConfig.getGetDataExecutorMaxPoolSize(),
                 dataServerConfig.getGetDataExecutorKeepAliveTime(), TimeUnit.SECONDS,
@@ -589,17 +581,6 @@ public class DataServerBeanConfiguration {
                 new NamedThreadFactory("DataServer-GetDataProcessor-executor", true));
         }
 
-        @Bean(name = "defaultRequestExecutor")
-        public ThreadPoolExecutor defaultRequestExecutor(DataServerConfig dataServerConfig) {
-            return new DataMetricsThreadPoolExecutor("DefaultRequestExecutor",
-                dataServerConfig.getDefaultRequestExecutorMinSize(),
-                dataServerConfig.getDefaultRequestExecutorMaxSize(),
-                dataServerConfig.getDefaultRequestExecutorKeepAliveTime(), TimeUnit.SECONDS,
-                new ArrayBlockingQueue<>(dataServerConfig.getDefaultRequestExecutorQueueSize()),
-                new NamedThreadFactory("DefaultRequestThread", true)
-
-            );
-        }
     }
 
     @Configuration
@@ -619,4 +600,5 @@ public class DataServerBeanConfiguration {
         }
 
     }
+
 }

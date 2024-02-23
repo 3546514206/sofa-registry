@@ -94,9 +94,9 @@ public class LocalDataServerCleanHandler {
      */
     public void reset() {
         synchronized (LocalDataServerCleanHandler.class) {
-            EVENT_QUEUE.clear();
-            if (task != null) {
+            if (EVENT_QUEUE.isEmpty() && task != null) {
                 task.stop();
+                EVENT_QUEUE.clear();
             }
         }
         EVENT_QUEUE.add(new DelayItem<>(new LocalCleanTask(), dataServerConfig

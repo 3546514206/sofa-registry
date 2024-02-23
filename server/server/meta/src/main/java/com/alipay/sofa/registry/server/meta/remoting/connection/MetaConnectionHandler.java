@@ -114,5 +114,4 @@ public class MetaConnectionHandler extends AbstractServerHandler implements Node
     public NodeType getNodeType() {
         return NodeType.META;
     }
-
 }

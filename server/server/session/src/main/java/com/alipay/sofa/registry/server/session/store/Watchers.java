@@ -19,7 +19,6 @@ package com.alipay.sofa.registry.server.session.store;
 import com.alipay.sofa.registry.common.model.store.Watcher;
 
 import java.util.Collection;
-import java.util.Map;
 
 /**
  *
@@ -46,6 +45,4 @@ public interface Watchers extends DataManager<Watcher, String, String> {
      * @return
      */
     boolean checkWatcherVersions(String dataInfoId, Long version);
-
-    Map<String, Map<String, Watcher>> getConnectWatchers();
 }

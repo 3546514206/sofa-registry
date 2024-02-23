@@ -124,8 +124,7 @@ public class ClientNodeConnectionHandler extends AbstractServerHandler {
         //avoid block connect ConnectionEventExecutor thread pool
         executorManager.getConnectClientExecutor().execute(() -> {
 
-            String connectId = NetUtil.toAddressString(channel.getRemoteAddress()) + ValueConstants.CONNECT_ID_SPLIT +
-                    NetUtil.toAddressString(channel.getLocalAddress());
+            String connectId = NetUtil.toAddressString(channel.getRemoteAddress());
             if (checkCache(connectId)) {
                 List<String> connectIds = new ArrayList<>();
                 connectIds.add(connectId);
@@ -160,13 +159,12 @@ public class ClientNodeConnectionHandler extends AbstractServerHandler {
 
     private void fireRenewDatum(Channel channel) {
         executorManager.getConnectClientExecutor().execute(() -> {
-            String connectId = NetUtil.toAddressString(channel.getRemoteAddress()) + ValueConstants.CONNECT_ID_SPLIT
-                    + NetUtil.toAddressString(channel.getLocalAddress());
+            String connectId = NetUtil.toAddressString(channel.getRemoteAddress());
             RENEW_LOGGER.info("Renew task is started: {}", connectId);
             recycleAsyncHashedWheelTimer.newTimeout(timerOut -> sessionRegistry.renewDatum(connectId), randomDelay(),
                     sessionServerConfig.getRenewDatumWheelTaskDelaySec(), TimeUnit.SECONDS, () -> {
                         Server sessionServer = boltExchange.getServer(sessionServerConfig.getServerPort());
-                        Channel channelClient = sessionServer.getChannel(URL.valueOf(connectId.split(ValueConstants.CONNECT_ID_SPLIT)[0]));
+                        Channel channelClient = sessionServer.getChannel(URL.valueOf(connectId));
                         boolean shouldContinue = channelClient != null && channel.isConnected();
                         if (!shouldContinue) {
                             RENEW_LOGGER.info("Renew task is stop: {}", connectId);

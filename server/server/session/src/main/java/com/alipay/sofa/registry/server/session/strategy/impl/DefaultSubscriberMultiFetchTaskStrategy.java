@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.alipay.sofa.registry.common.model.Node;
@@ -245,8 +244,6 @@ public class DefaultSubscriberMultiFetchTaskStrategy implements SubscriberMultiF
         parameter.put(receivedData, subscriber.getSourceAddress());
         TaskEvent taskEvent = new TaskEvent(parameter,
             TaskEvent.TaskType.RECEIVED_DATA_MULTI_PUSH_TASK);
-        // setup PUSH_CLIENT_SUBSCRIBERS, which is used in AlipayPushTaskMergeProcessor
-        taskEvent.setAttribute(Constant.PUSH_CLIENT_SUBSCRIBERS, Lists.newArrayList(subscriber));
         taskLogger.info("send {} taskURL:{},taskScope:{}", taskEvent.getTaskType(),
             subscriber.getSourceAddress(), subscriber.getScope());
         taskListenerManager.sendTaskEvent(taskEvent);

@@ -59,5 +59,4 @@ public class RenewNodesRequestHandler extends AbstractServerHandler<RenewNodesRe
     public HandlerType getType() {
         return HandlerType.PROCESSER;
     }
-
 }

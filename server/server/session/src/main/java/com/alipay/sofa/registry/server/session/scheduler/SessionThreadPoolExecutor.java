@@ -16,8 +16,6 @@
  */
 package com.alipay.sofa.registry.server.session.scheduler;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.RejectedExecutionHandler;
@@ -34,36 +32,31 @@ import com.alipay.sofa.registry.metrics.TaskMetrics;
  * @author shangyu.wh
  * @version $Id: ThreadPoolExecutorSession.java, v 0.1 2018-10-11 19:07 shangyu.wh Exp $
  */
-public class SessionMetricsThreadPoolExecutor extends ThreadPoolExecutor {
+public class SessionThreadPoolExecutor extends ThreadPoolExecutor {
 
-    private static final Logger LOGGER = LoggerFactory
-                                           .getLogger(SessionMetricsThreadPoolExecutor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SessionThreadPoolExecutor.class);
 
     private String              executorName;
 
-    public SessionMetricsThreadPoolExecutor(String executorName, int corePoolSize,
-                                            int maximumPoolSize, long keepAliveTime, TimeUnit unit,
-                                            BlockingQueue<Runnable> workQueue,
-                                            ThreadFactory threadFactory,
-                                            RejectedExecutionHandler handler) {
+    public SessionThreadPoolExecutor(String executorName, int corePoolSize, int maximumPoolSize,
+                                     long keepAliveTime, TimeUnit unit,
+                                     BlockingQueue<Runnable> workQueue,
+                                     ThreadFactory threadFactory, RejectedExecutionHandler handler) {
         super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory);
-        this.executorName = "Session-" + executorName;
+        this.executorName = executorName;
         registerTaskMetrics();
         this.setRejectedExecutionHandler(handler);
     }
 
-    public SessionMetricsThreadPoolExecutor(String executorName, int corePoolSize,
-                                            int maximumPoolSize, long keepAliveTime, TimeUnit unit,
-                                            BlockingQueue<Runnable> workQueue,
-                                            ThreadFactory threadFactory) {
-        this(executorName, corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue,
-            threadFactory, (r, executor) -> {
-                String msg = String.format(
-                    "Task(%s) %s rejected from %s, throw RejectedExecutionException.", r.getClass(),
-                    r, executor);
-                LOGGER.error(msg);
-                throw new RejectedExecutionException(msg);
-            });
+    public SessionThreadPoolExecutor(String executorName, int corePoolSize, int maximumPoolSize, long keepAliveTime,
+                                     TimeUnit unit, BlockingQueue<Runnable> workQueue, ThreadFactory threadFactory) {
+        this(executorName, corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory,
+                (r, executor) -> {
+                    String msg = String.format("Task(%s) %s rejected from %s, throw RejectedExecutionException.",
+                            r.getClass(), r, executor);
+                    LOGGER.error(msg);
+                    throw new RejectedExecutionException(msg);
+                });
     }
 
     private void registerTaskMetrics() {

@@ -41,7 +41,5 @@ public enum StartTaskTypeEnum {
     /**
      * VersionCompareTask
      */
-    VERSION_COMPARE,
-
-    LOG_METRICS
+    VERSION_COMPARE
 }

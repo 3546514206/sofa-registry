@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
@@ -68,9 +67,6 @@ public class DefaultMetaServiceImpl implements IMetaServerService {
 
     @Autowired
     private DataServerConfig            dataServerConfig;
-
-    @Autowired
-    private ThreadPoolExecutor          defaultRequestExecutor;
 
     @Autowired
     private MetaNodeExchanger           metaNodeExchanger;
@@ -320,7 +316,7 @@ public class DefaultMetaServiceImpl implements IMetaServerService {
         try {
             if (clientStart.compareAndSet(false, true)) {
                 String serverConf = getServerConfig();
-                raftClient = new RaftClient(getGroup(), serverConf, defaultRequestExecutor);
+                raftClient = new RaftClient(getGroup(), serverConf);
                 raftClient.start();
             }
         } catch (Exception e) {
@@ -334,7 +330,7 @@ public class DefaultMetaServiceImpl implements IMetaServerService {
         Set<String> ips = dataServerConfig.getMetaServerIpAddresses();
         if (ips != null && !ips.isEmpty()) {
             ret = ips.stream().map(ip -> ip + ":" + ValueConstants.RAFT_SERVER_PORT)
-                .collect(Collectors.joining(","));
+                    .collect(Collectors.joining(","));
         }
         if (ret.isEmpty()) {
             throw new IllegalArgumentException("Init raft server config error!");

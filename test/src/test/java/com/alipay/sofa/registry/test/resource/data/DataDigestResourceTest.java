@@ -30,8 +30,6 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 
-import com.alipay.sofa.registry.common.model.constants.ValueConstants;
-import com.alipay.sofa.registry.net.NetUtil;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -95,8 +93,7 @@ public class DataDigestResourceTest extends BaseIntegrationTest {
     @Test
     public void testGetPublishersByConnectId() throws Exception {
         Map<String, String> parameters = new HashMap<>();
-        parameters.put(NetUtil.genHost(LOCAL_ADDRESS, getSourcePort(registryClient1)),
-            NetUtil.genHost(LOCAL_ADDRESS, 9600));
+        parameters.put(LOCAL_ADDRESS, String.valueOf(getSourcePort(registryClient1)));
         Map<String, Map<String, Publisher>> publisherMap = dataChannel
             .getWebTarget()
             .path("digest/connect/query")
@@ -105,28 +102,17 @@ public class DataDigestResourceTest extends BaseIntegrationTest {
                 new GenericType<Map<String, Map<String, Publisher>>>() {
                 });
         assertEquals(1, publisherMap.size());
-        assertEquals(
-            1,
-            publisherMap.get(
-                NetUtil.genHost(LOCAL_ADDRESS, getSourcePort(registryClient1))
-                        + ValueConstants.CONNECT_ID_SPLIT + NetUtil.genHost(LOCAL_ADDRESS, 9600))
+        assertEquals(1,
+            publisherMap.get(LOCAL_ADDRESS + ":" + String.valueOf(getSourcePort(registryClient1)))
                 .size());
-        assertEquals(
-            dataId,
-            publisherMap
-                .get(
-                    NetUtil.genHost(LOCAL_ADDRESS, getSourcePort(registryClient1))
-                            + ValueConstants.CONNECT_ID_SPLIT
-                            + NetUtil.genHost(LOCAL_ADDRESS, 9600)).values().iterator().next()
-                .getDataId());
+        assertEquals(dataId,
+            publisherMap.get(LOCAL_ADDRESS + ":" + String.valueOf(getSourcePort(registryClient1)))
+                .values().iterator().next().getDataId());
         assertEquals(
             value,
             bytes2Object(publisherMap
-                .get(
-                    NetUtil.genHost(LOCAL_ADDRESS, getSourcePort(registryClient1))
-                            + ValueConstants.CONNECT_ID_SPLIT
-                            + NetUtil.genHost(LOCAL_ADDRESS, 9600)).values().iterator().next()
-                .getDataList().get(0).getBytes()));
+                .get(LOCAL_ADDRESS + ":" + String.valueOf(getSourcePort(registryClient1))).values()
+                .iterator().next().getDataList().get(0).getBytes()));
     }
 
     @Test
