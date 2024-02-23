@@ -14,27 +14,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.registry.server.meta.executor;
+package com.alipay.sofa.registry.server.data.util;
 
 import com.alipay.sofa.registry.log.Logger;
 import com.alipay.sofa.registry.log.LoggerFactory;
-import com.alipay.sofa.registry.metrics.TaskMetrics;
 
 import java.util.concurrent.*;
 
-public class MetaMetricsThreadPoolExecutor extends ThreadPoolExecutor {
+/**
+ * @author shangyu.wh
+ * @version $Id: ThreadPoolExecutorDataServer.java, v 0.1 2018-10-25 20:40 shangyu.wh Exp $
+ */
+public class ThreadPoolExecutorDataServer extends ThreadPoolExecutor {
 
     private static final Logger LOGGER = LoggerFactory
-                                           .getLogger(MetaMetricsThreadPoolExecutor.class);
-    private String              executorName;
+            .getLogger(ThreadPoolExecutorDataServer.class);
 
-    public MetaMetricsThreadPoolExecutor(String executorName, int corePoolSize,
-                                         int maximumPoolSize, long keepAliveTime, TimeUnit unit,
-                                         BlockingQueue<Runnable> workQueue,
-                                         ThreadFactory threadFactory) {
+    private String executorName;
+
+    public ThreadPoolExecutorDataServer(String executorName, int corePoolSize, int maximumPoolSize,
+                                        long keepAliveTime, TimeUnit unit,
+                                        BlockingQueue<Runnable> workQueue,
+                                        ThreadFactory threadFactory) {
         super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory);
-        this.executorName = "Meta-" + executorName;
-        registerTaskMetrics();
+        this.executorName = executorName;
     }
 
     @Override
@@ -42,17 +45,13 @@ public class MetaMetricsThreadPoolExecutor extends ThreadPoolExecutor {
         return super.toString() + executorName;
     }
 
-    private void registerTaskMetrics() {
-        TaskMetrics.getInstance().registerThreadExecutor(executorName, this);
-    }
-
     @Override
     public void execute(Runnable command) {
         try {
             super.execute(command);
         } catch (RejectedExecutionException e) {
-            LOGGER.error("Processor meta executor {} Rejected Execution!command {}", this,
-                command.getClass(), e);
+            LOGGER.error("Processor session executor {} Rejected Execution!command {}", this,
+                    command.getClass(), e);
         }
     }
 }

@@ -16,22 +16,6 @@
  */
 package com.alipay.sofa.registry.server.data.bootstrap;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
-import com.alipay.sofa.registry.server.data.remoting.dataserver.task.LogMetricsTask;
-import org.glassfish.jersey.jackson.JacksonFeature;
-import org.glassfish.jersey.server.ResourceConfig;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-
 import com.alipay.sofa.registry.remoting.bolt.exchange.BoltExchange;
 import com.alipay.sofa.registry.remoting.exchange.Exchange;
 import com.alipay.sofa.registry.remoting.jersey.exchange.JerseyExchange;
@@ -41,11 +25,7 @@ import com.alipay.sofa.registry.server.data.cache.DatumCache;
 import com.alipay.sofa.registry.server.data.cache.LocalDatumStorage;
 import com.alipay.sofa.registry.server.data.change.DataChangeHandler;
 import com.alipay.sofa.registry.server.data.change.event.DataChangeEventCenter;
-import com.alipay.sofa.registry.server.data.change.notify.BackUpNotifier;
-import com.alipay.sofa.registry.server.data.change.notify.IDataChangeNotifier;
-import com.alipay.sofa.registry.server.data.change.notify.SessionServerNotifier;
-import com.alipay.sofa.registry.server.data.change.notify.SnapshotBackUpNotifier;
-import com.alipay.sofa.registry.server.data.change.notify.TempPublisherNotifier;
+import com.alipay.sofa.registry.server.data.change.notify.*;
 import com.alipay.sofa.registry.server.data.datasync.AcceptorStore;
 import com.alipay.sofa.registry.server.data.datasync.SyncDataService;
 import com.alipay.sofa.registry.server.data.datasync.sync.LocalAcceptorStore;
@@ -54,22 +34,13 @@ import com.alipay.sofa.registry.server.data.datasync.sync.StoreServiceFactory;
 import com.alipay.sofa.registry.server.data.datasync.sync.SyncDataServiceImpl;
 import com.alipay.sofa.registry.server.data.event.AfterWorkingProcess;
 import com.alipay.sofa.registry.server.data.event.EventCenter;
-import com.alipay.sofa.registry.server.data.event.handler.AfterWorkingProcessHandler;
-import com.alipay.sofa.registry.server.data.event.handler.DataServerChangeEventHandler;
-import com.alipay.sofa.registry.server.data.event.handler.LocalDataServerChangeEventHandler;
-import com.alipay.sofa.registry.server.data.event.handler.MetaServerChangeEventHandler;
-import com.alipay.sofa.registry.server.data.event.handler.StartTaskEventHandler;
+import com.alipay.sofa.registry.server.data.event.handler.*;
 import com.alipay.sofa.registry.server.data.node.DataNodeStatus;
 import com.alipay.sofa.registry.server.data.remoting.DataNodeExchanger;
 import com.alipay.sofa.registry.server.data.remoting.MetaNodeExchanger;
 import com.alipay.sofa.registry.server.data.remoting.dataserver.DataServerConnectionFactory;
 import com.alipay.sofa.registry.server.data.remoting.dataserver.GetSyncDataHandler;
-import com.alipay.sofa.registry.server.data.remoting.dataserver.handler.DataSyncServerConnectionHandler;
-import com.alipay.sofa.registry.server.data.remoting.dataserver.handler.FetchDataHandler;
-import com.alipay.sofa.registry.server.data.remoting.dataserver.handler.NotifyDataSyncHandler;
-import com.alipay.sofa.registry.server.data.remoting.dataserver.handler.NotifyFetchDatumHandler;
-import com.alipay.sofa.registry.server.data.remoting.dataserver.handler.NotifyOnlineHandler;
-import com.alipay.sofa.registry.server.data.remoting.dataserver.handler.SyncDataHandler;
+import com.alipay.sofa.registry.server.data.remoting.dataserver.handler.*;
 import com.alipay.sofa.registry.server.data.remoting.dataserver.task.AbstractTask;
 import com.alipay.sofa.registry.server.data.remoting.dataserver.task.ConnectionRefreshTask;
 import com.alipay.sofa.registry.server.data.remoting.dataserver.task.RenewNodeTask;
@@ -89,22 +60,28 @@ import com.alipay.sofa.registry.server.data.remoting.sessionserver.SessionServer
 import com.alipay.sofa.registry.server.data.remoting.sessionserver.disconnect.DisconnectEventHandler;
 import com.alipay.sofa.registry.server.data.remoting.sessionserver.forward.ForwardService;
 import com.alipay.sofa.registry.server.data.remoting.sessionserver.forward.ForwardServiceImpl;
-import com.alipay.sofa.registry.server.data.remoting.sessionserver.handler.ClientOffHandler;
-import com.alipay.sofa.registry.server.data.remoting.sessionserver.handler.DataServerConnectionHandler;
-import com.alipay.sofa.registry.server.data.remoting.sessionserver.handler.DatumSnapshotHandler;
-import com.alipay.sofa.registry.server.data.remoting.sessionserver.handler.GetDataHandler;
-import com.alipay.sofa.registry.server.data.remoting.sessionserver.handler.GetDataVersionsHandler;
-import com.alipay.sofa.registry.server.data.remoting.sessionserver.handler.PublishDataHandler;
-import com.alipay.sofa.registry.server.data.remoting.sessionserver.handler.RenewDatumHandler;
-import com.alipay.sofa.registry.server.data.remoting.sessionserver.handler.SessionServerRegisterHandler;
-import com.alipay.sofa.registry.server.data.remoting.sessionserver.handler.UnPublishDataHandler;
+import com.alipay.sofa.registry.server.data.remoting.sessionserver.handler.*;
 import com.alipay.sofa.registry.server.data.renew.DatumLeaseManager;
 import com.alipay.sofa.registry.server.data.renew.LocalDataServerCleanHandler;
 import com.alipay.sofa.registry.server.data.resource.DataDigestResource;
 import com.alipay.sofa.registry.server.data.resource.HealthResource;
-import com.alipay.sofa.registry.server.data.util.DataMetricsThreadPoolExecutor;
+import com.alipay.sofa.registry.server.data.util.ThreadPoolExecutorDataServer;
 import com.alipay.sofa.registry.util.NamedThreadFactory;
 import com.alipay.sofa.registry.util.PropertySplitter;
+import org.glassfish.jersey.jackson.JacksonFeature;
+import org.glassfish.jersey.server.ResourceConfig;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -419,7 +396,6 @@ public class DataServerBeanConfiguration {
             list.add(sessionServerNotifier());
             list.add(tempPublisherNotifier());
             list.add(backUpNotifier());
-            list.add(snapshotBackUpNotifier());
             return list;
         }
 
@@ -513,18 +489,12 @@ public class DataServerBeanConfiguration {
             return new RenewNodeTask();
         }
 
-        @Bean
-        public LogMetricsTask logMetricsTask() {
-            return new LogMetricsTask();
-        }
-
         @Bean(name = "tasks")
         public List<AbstractTask> tasks() {
             List<AbstractTask> list = new ArrayList<>();
             list.add(connectionRefreshTask());
             list.add(connectionRefreshMetaTask());
             list.add(renewNodeTask());
-            list.add(logMetricsTask());
             return list;
         }
 
@@ -563,43 +533,32 @@ public class DataServerBeanConfiguration {
 
         @Bean(name = "publishProcessorExecutor")
         public ThreadPoolExecutor publishProcessorExecutor(DataServerConfig dataServerConfig) {
-            return new DataMetricsThreadPoolExecutor("PublishProcessorExecutor",
-                dataServerConfig.getPublishExecutorMinPoolSize(),
-                dataServerConfig.getPublishExecutorMaxPoolSize(), 300, TimeUnit.SECONDS,
-                new ArrayBlockingQueue<>(dataServerConfig.getPublishExecutorQueueSize()),
-                new NamedThreadFactory("DataServer-PublishProcessor-executor", true));
+            return new ThreadPoolExecutorDataServer("PublishProcessorExecutor",
+                    dataServerConfig.getPublishExecutorMinPoolSize(),
+                    dataServerConfig.getPublishExecutorMaxPoolSize(), 300, TimeUnit.SECONDS,
+                    new ArrayBlockingQueue<>(dataServerConfig.getPublishExecutorQueueSize()),
+                    new NamedThreadFactory("DataServer-PublishProcessor-executor", true));
         }
 
         @Bean(name = "renewDatumProcessorExecutor")
         public ThreadPoolExecutor renewDatumProcessorExecutor(DataServerConfig dataServerConfig) {
-            return new DataMetricsThreadPoolExecutor("RenewDatumProcessorExecutor",
-                dataServerConfig.getRenewDatumExecutorMinPoolSize(),
-                dataServerConfig.getRenewDatumExecutorMaxPoolSize(), 300, TimeUnit.SECONDS,
-                new ArrayBlockingQueue<>(dataServerConfig.getRenewDatumExecutorQueueSize()),
-                new NamedThreadFactory("DataServer-RenewDatumProcessor-executor", true));
+            return new ThreadPoolExecutorDataServer("RenewDatumProcessorExecutor",
+                    dataServerConfig.getRenewDatumExecutorMinPoolSize(),
+                    dataServerConfig.getRenewDatumExecutorMaxPoolSize(), 300, TimeUnit.SECONDS,
+                    new ArrayBlockingQueue<>(dataServerConfig.getRenewDatumExecutorQueueSize()),
+                    new NamedThreadFactory("DataServer-RenewDatumProcessor-executor", true));
         }
 
         @Bean(name = "getDataProcessorExecutor")
         public ThreadPoolExecutor getDataProcessorExecutor(DataServerConfig dataServerConfig) {
-            return new DataMetricsThreadPoolExecutor("GetDataProcessorExecutor",
-                dataServerConfig.getGetDataExecutorMinPoolSize(),
-                dataServerConfig.getGetDataExecutorMaxPoolSize(),
-                dataServerConfig.getGetDataExecutorKeepAliveTime(), TimeUnit.SECONDS,
-                new ArrayBlockingQueue<>(dataServerConfig.getGetDataExecutorQueueSize()),
-                new NamedThreadFactory("DataServer-GetDataProcessor-executor", true));
+            return new ThreadPoolExecutorDataServer("GetDataProcessorExecutor",
+                    dataServerConfig.getGetDataExecutorMinPoolSize(),
+                    dataServerConfig.getGetDataExecutorMaxPoolSize(),
+                    dataServerConfig.getGetDataExecutorKeepAliveTime(), TimeUnit.SECONDS,
+                    new ArrayBlockingQueue<>(dataServerConfig.getGetDataExecutorQueueSize()),
+                    new NamedThreadFactory("DataServer-GetDataProcessor-executor", true));
         }
 
-        @Bean(name = "defaultRequestExecutor")
-        public ThreadPoolExecutor defaultRequestExecutor(DataServerConfig dataServerConfig) {
-            return new DataMetricsThreadPoolExecutor("DefaultRequestExecutor",
-                dataServerConfig.getDefaultRequestExecutorMinSize(),
-                dataServerConfig.getDefaultRequestExecutorMaxSize(),
-                dataServerConfig.getDefaultRequestExecutorKeepAliveTime(), TimeUnit.SECONDS,
-                new ArrayBlockingQueue<>(dataServerConfig.getDefaultRequestExecutorQueueSize()),
-                new NamedThreadFactory("DefaultRequestThread", true)
-
-            );
-        }
     }
 
     @Configuration
@@ -619,4 +578,5 @@ public class DataServerBeanConfiguration {
         }
 
     }
+
 }

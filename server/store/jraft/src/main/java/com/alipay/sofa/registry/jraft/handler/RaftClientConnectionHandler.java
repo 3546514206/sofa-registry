@@ -23,10 +23,6 @@ import com.alipay.sofa.registry.log.Logger;
 import com.alipay.sofa.registry.log.LoggerFactory;
 import com.alipay.sofa.registry.remoting.Channel;
 import com.alipay.sofa.registry.remoting.ChannelHandler;
-import sun.nio.ch.ThreadPool;
-
-import java.util.concurrent.Executor;
-import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  *
@@ -39,15 +35,13 @@ public class RaftClientConnectionHandler implements ChannelHandler {
 
     private RaftClient          raftClient;
 
-    private ThreadPoolExecutor  executor;
-
     /**
      * constructor
+     *
      * @param raftClient
      */
-    public RaftClientConnectionHandler(RaftClient raftClient, ThreadPoolExecutor executor) {
+    public RaftClientConnectionHandler(RaftClient raftClient) {
         this.raftClient = raftClient;
-        this.executor = executor;
     }
 
     @Override
@@ -93,10 +87,5 @@ public class RaftClientConnectionHandler implements ChannelHandler {
     @Override
     public Class interest() {
         return null;
-    }
-
-    @Override
-    public Executor getExecutor() {
-        return executor;
     }
 }

@@ -16,10 +16,6 @@
  */
 package com.alipay.sofa.registry.server.meta.executor;
 
-import java.util.concurrent.*;
-
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.alipay.sofa.registry.common.model.Node.NodeType;
 import com.alipay.sofa.registry.server.meta.bootstrap.MetaServerConfig;
 import com.alipay.sofa.registry.server.meta.registry.Registry;
@@ -27,8 +23,12 @@ import com.alipay.sofa.registry.server.meta.remoting.MetaClientExchanger;
 import com.alipay.sofa.registry.server.meta.remoting.RaftExchanger;
 import com.alipay.sofa.registry.task.scheduler.TimedSupervisorTask;
 import com.alipay.sofa.registry.util.NamedThreadFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.concurrent.*;
 
 /**
+ *
  * @author shangyu.wh
  * @version $Id: ExecutorManager.java, v 0.1 2018-01-16 15:51 shangyu.wh Exp $
  */
@@ -61,7 +61,6 @@ public class ExecutorManager {
 
     /**
      * constructor
-     *
      * @param metaServerConfig
      */
     public ExecutorManager(MetaServerConfig metaServerConfig) {
@@ -115,7 +114,6 @@ public class ExecutorManager {
             new LinkedBlockingQueue<>(metaServerConfig.getRaftClientRefreshExecutorQueueSize()),
             new NamedThreadFactory("MetaScheduler-RaftClientRefresh"));
         raftClientRefreshExecutor.allowCoreThreadTimeOut(true);
-
     }
 
     public void startScheduler() {
@@ -160,7 +158,8 @@ public class ExecutorManager {
                         metaServerConfig.getSchedulerCheckNodeListChangePushExpBackOffBound(),
                         () -> raftExchanger.refreshRaftClient()),
                 metaServerConfig.getSchedulerCheckNodeListChangePushFirstDelay(), TimeUnit.SECONDS);
-   }
+
+    }
 
     public void stopScheduler() {
         if (scheduler != null && !scheduler.isShutdown()) {

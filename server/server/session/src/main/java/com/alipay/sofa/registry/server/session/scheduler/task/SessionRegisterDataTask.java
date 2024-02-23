@@ -16,11 +16,6 @@
  */
 package com.alipay.sofa.registry.server.session.scheduler.task;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
-import com.alipay.sofa.registry.common.model.constants.ValueConstants;
 import com.alipay.sofa.registry.common.model.dataserver.SessionServerRegisterRequest;
 import com.alipay.sofa.registry.log.Logger;
 import com.alipay.sofa.registry.log.LoggerFactory;
@@ -34,15 +29,18 @@ import com.alipay.sofa.registry.server.session.bootstrap.SessionServerConfig;
 import com.alipay.sofa.registry.server.session.node.SessionProcessIdGenerator;
 import com.alipay.sofa.registry.task.listener.TaskEvent;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
 /**
- *
  * @author shangyu.wh
  * @author kezhu.wukz
  * @version $Id: SessionRegisterDataTask.java, v 0.1 2018-04-16 16:07 shangyu.wh Exp $
  */
 public class SessionRegisterDataTask extends AbstractSessionTask {
 
-    private static final Logger          LOGGER = LoggerFactory.getLogger(
+    private static final Logger LOGGER = LoggerFactory.getLogger(
                                                     SessionRegisterDataTask.class, "[Task]");
 
     private final Exchange               boltExchange;
@@ -83,8 +81,7 @@ public class SessionRegisterDataTask extends AbstractSessionTask {
 
             Collection<Channel> chs = sessionServer.getChannels();
             Set<String> connectIds = new HashSet<>();
-            chs.forEach(channel -> connectIds.add(NetUtil.toAddressString(channel.getRemoteAddress())
-                    + ValueConstants.CONNECT_ID_SPLIT + NetUtil.toAddressString(channel.getLocalAddress())));
+            chs.forEach(channel -> connectIds.add(NetUtil.toAddressString(channel.getRemoteAddress())));
 
             sessionServerRegisterRequest = new SessionServerRegisterRequest(
                     SessionProcessIdGenerator.getSessionProcessId(), connectIds);

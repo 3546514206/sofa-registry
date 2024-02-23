@@ -16,24 +16,17 @@
  */
 package com.alipay.sofa.registry.server.data.remoting.sessionserver;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import com.alipay.sofa.registry.server.data.bootstrap.DataServerConfig;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.alipay.remoting.Connection;
 import com.alipay.sofa.registry.log.Logger;
 import com.alipay.sofa.registry.log.LoggerFactory;
 import com.alipay.sofa.registry.net.NetUtil;
 import com.alipay.sofa.registry.server.data.remoting.sessionserver.disconnect.DisconnectEventHandler;
 import com.alipay.sofa.registry.server.data.remoting.sessionserver.disconnect.SessionServerDisconnectEvent;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * the factory to hold SessionServer connections
@@ -46,7 +39,8 @@ public class SessionServerConnectionFactory {
     private static final Logger            LOGGER                      = LoggerFactory
                                                                            .getLogger(SessionServerConnectionFactory.class);
 
-    private static final Map               EMPTY_MAP                   = new HashMap(0);
+    private static final int DELAY = 30 * 1000;
+    private static final Map EMPTY_MAP = new HashMap(0);
 
     /**
      * key  :   SessionServer address
@@ -68,9 +62,6 @@ public class SessionServerConnectionFactory {
 
     @Autowired
     private DisconnectEventHandler         disconnectEventHandler;
-
-    @Autowired
-    private DataServerConfig               dataServerConfig;
 
     /**
      * register connection
@@ -128,7 +119,7 @@ public class SessionServerConnectionFactory {
             // The SessionServerDisconnectEvent is triggered only when the last connection is broken
             if (pair == null || pair.getConnections().isEmpty()) {
                 disconnectEventHandler.receive(new SessionServerDisconnectEvent(processId,
-                    sessionConnAddress, dataServerConfig.getSessionDisconnectDelayMs()));
+                        sessionConnAddress, DELAY));
             }
         }
     }

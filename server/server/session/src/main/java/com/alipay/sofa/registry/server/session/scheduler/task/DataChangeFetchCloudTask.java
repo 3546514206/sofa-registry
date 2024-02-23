@@ -16,15 +16,6 @@
  */
 package com.alipay.sofa.registry.server.session.scheduler.task;
 
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-
 import com.alipay.sofa.registry.common.model.Node.NodeType;
 import com.alipay.sofa.registry.common.model.dataserver.Datum;
 import com.alipay.sofa.registry.common.model.store.BaseInfo.ClientVersion;
@@ -35,12 +26,8 @@ import com.alipay.sofa.registry.core.model.ScopeEnum;
 import com.alipay.sofa.registry.log.Logger;
 import com.alipay.sofa.registry.log.LoggerFactory;
 import com.alipay.sofa.registry.server.session.bootstrap.SessionServerConfig;
-import com.alipay.sofa.registry.server.session.cache.CacheAccessException;
-import com.alipay.sofa.registry.server.session.cache.CacheService;
-import com.alipay.sofa.registry.server.session.cache.DatumKey;
-import com.alipay.sofa.registry.server.session.cache.Key;
+import com.alipay.sofa.registry.server.session.cache.*;
 import com.alipay.sofa.registry.server.session.cache.Key.KeyType;
-import com.alipay.sofa.registry.server.session.cache.Value;
 import com.alipay.sofa.registry.server.session.converter.ReceivedDataConverter;
 import com.alipay.sofa.registry.server.session.node.NodeManager;
 import com.alipay.sofa.registry.server.session.node.NodeManagerFactory;
@@ -52,15 +39,19 @@ import com.alipay.sofa.registry.task.listener.TaskEvent;
 import com.alipay.sofa.registry.task.listener.TaskEvent.TaskType;
 import com.alipay.sofa.registry.task.listener.TaskListenerManager;
 
+import java.net.InetSocketAddress;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
+
 /**
- *
  * @author shangyu.wh
  * @version $Id: DataChangeFetchCloudTask.java, v 0.1 2018-03-16 15:28 shangyu.wh Exp $
  */
 public class DataChangeFetchCloudTask extends AbstractSessionTask {
 
-    private final static Logger       LOGGER     = LoggerFactory
-                                                     .getLogger(DataChangeFetchCloudTask.class);
+    private final static Logger LOGGER = LoggerFactory
+            .getLogger(DataChangeFetchCloudTask.class);
 
     private static final Logger       taskLogger = LoggerFactory.getLogger(
                                                      DataChangeFetchCloudTask.class, "[Task]");
@@ -275,7 +266,6 @@ public class DataChangeFetchCloudTask extends AbstractSessionTask {
         TaskEvent taskEvent = new TaskEvent(parameter, TaskType.RECEIVED_DATA_MULTI_PUSH_TASK);
         taskEvent.setTaskClosure(pushTaskClosure);
         taskEvent.setAttribute(Constant.PUSH_CLIENT_SUBSCRIBERS, subscribers);
-
         taskLogger.info("send {} taskURL:{},taskScope:{},version:{},taskId={}",
             taskEvent.getTaskType(), subscriber.getSourceAddress(), scopeEnum,
             receivedData.getVersion(), taskEvent.getTaskId());

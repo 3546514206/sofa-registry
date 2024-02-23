@@ -16,30 +16,11 @@
  */
 package com.alipay.sofa.registry.server.data.resource;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.MediaType;
-
-import com.alipay.sofa.registry.common.model.constants.ValueConstants;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.alipay.remoting.Connection;
 import com.alipay.sofa.registry.common.model.dataserver.Datum;
 import com.alipay.sofa.registry.common.model.store.DataInfo;
 import com.alipay.sofa.registry.common.model.store.Publisher;
+import com.alipay.sofa.registry.net.NetUtil;
 import com.alipay.sofa.registry.server.data.bootstrap.DataServerConfig;
 import com.alipay.sofa.registry.server.data.cache.DataServerCache;
 import com.alipay.sofa.registry.server.data.cache.DatumCache;
@@ -47,6 +28,13 @@ import com.alipay.sofa.registry.server.data.node.DataServerNode;
 import com.alipay.sofa.registry.server.data.remoting.dataserver.DataServerNodeFactory;
 import com.alipay.sofa.registry.server.data.remoting.metaserver.MetaServerConnectionFactory;
 import com.alipay.sofa.registry.server.data.remoting.sessionserver.SessionServerConnectionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -105,8 +93,8 @@ public class DataDigestResource {
     public Map<String, Map<String, Publisher>> getPublishersByConnectId(Map<String, String> map) {
         Map<String, Map<String, Publisher>> ret = new HashMap<>();
         if (map != null && !map.isEmpty()) {
-            map.forEach((clientConnectId, sessionConnectId) -> {
-                String connectId = clientConnectId + ValueConstants.CONNECT_ID_SPLIT + sessionConnectId;
+            map.forEach((ip, port) -> {
+                String connectId = NetUtil.genHost(ip, Integer.valueOf(port));
                 if (!connectId.isEmpty()) {
                     Map<String, Publisher> publisherMap = datumCache.getByConnectId(connectId);
                     if (publisherMap != null && !publisherMap.isEmpty()) {

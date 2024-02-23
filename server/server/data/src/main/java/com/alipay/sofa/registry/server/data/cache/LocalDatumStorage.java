@@ -16,16 +16,6 @@
  */
 package com.alipay.sofa.registry.server.data.cache;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
-import com.alipay.sofa.registry.common.model.constants.ValueConstants;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.alipay.sofa.registry.common.model.dataserver.Datum;
 import com.alipay.sofa.registry.common.model.store.Publisher;
 import com.alipay.sofa.registry.common.model.store.WordCache;
@@ -33,6 +23,14 @@ import com.alipay.sofa.registry.server.data.bootstrap.DataServerConfig;
 import com.alipay.sofa.registry.server.data.change.DataChangeTypeEnum;
 import com.alipay.sofa.registry.server.data.node.DataServerNode;
 import com.alipay.sofa.registry.server.data.remoting.dataserver.DataServerNodeFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * datum storage of local dataCenter
@@ -410,9 +408,7 @@ public class LocalDatumStorage implements DatumStorage {
     }
 
     private String getConnectId(Publisher cachePub) {
-        return WordCache.getInstance().getWordCache(
-            cachePub.getSourceAddress().getAddressString() + ValueConstants.CONNECT_ID_SPLIT
-                    + cachePub.getTargetAddress().getAddressString());
+        return WordCache.getInstance().getWordCache(cachePub.getSourceAddress().getAddressString());
     }
 
     /**

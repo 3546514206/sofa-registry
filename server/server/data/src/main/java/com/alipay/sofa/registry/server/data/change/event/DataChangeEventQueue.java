@@ -16,15 +16,6 @@
  */
 package com.alipay.sofa.registry.server.data.change.event;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.DelayQueue;
-import java.util.concurrent.Executor;
-import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.locks.ReentrantLock;
-
 import com.alipay.sofa.registry.common.model.constants.ValueConstants;
 import com.alipay.sofa.registry.common.model.dataserver.Datum;
 import com.alipay.sofa.registry.common.model.store.Publisher;
@@ -42,6 +33,11 @@ import com.alipay.sofa.registry.server.data.node.DataServerNode;
 import com.alipay.sofa.registry.server.data.remoting.dataserver.DataServerNodeFactory;
 import com.google.common.collect.Interners;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.*;
+import java.util.concurrent.locks.ReentrantLock;
+
 /**
  * a queue of DataChangeEvent
  *
@@ -50,7 +46,7 @@ import com.google.common.collect.Interners;
  */
 public class DataChangeEventQueue {
 
-    private static final Logger                        LOGGER                    = LoggerFactory
+    private static final Logger LOGGER = LoggerFactory
                                                                                      .getLogger(DataChangeEventQueue.class);
 
     private static final Logger                        LOGGER_START              = LoggerFactory
@@ -123,12 +119,7 @@ public class DataChangeEventQueue {
      * @param event
      */
     public void onChange(IDataChangeEvent event) {
-        try {
-            eventQueue.add(event);
-        } catch (Throwable e) {
-            LOGGER.error("Error onChange: " + e.getMessage(), e);
-            throw e;
-        }
+        eventQueue.add(event);
     }
 
     /**
@@ -234,8 +225,8 @@ public class DataChangeEventQueue {
             Map<String, Publisher> pubMap = datumCache.getByConnectId(connectId);
             if (pubMap != null && !pubMap.isEmpty()) {
                 LOGGER.info(
-                    "[{}] client off begin, connectId={}, occurTimestamp={}, all pubSize={}",
-                    getName(), connectId, event.getOccurredTimestamp(), pubMap.size());
+                        "[{}] client off begin, connectId={}, occurTimestamp={}, all pubSize={}",
+                        getName(), connectId, event.getOccurredTimestamp(), pubMap.size());
                 int count = 0;
                 for (Publisher publisher : pubMap.values()) {
                     // Only care dataInfoIds which belong to this queue
@@ -244,22 +235,24 @@ public class DataChangeEventQueue {
                     }
 
                     DataServerNode dataServerNode = DataServerNodeFactory.computeDataServerNode(
-                        dataServerConfig.getLocalDataCenter(), publisher.getDataInfoId());
+                            dataServerConfig.getLocalDataCenter(), publisher.getDataInfoId());
                     //current dataCenter backup data need not unPub,it will be unPub by backup sync event
                     if (DataServerConfig.IP.equals(dataServerNode.getIp())) {
                         Datum datum = new Datum(new UnPublisher(publisher.getDataInfoId(),
-                            publisher.getRegisterId(), event.getOccurredTimestamp()),
-                            event.getDataCenter(), event.getVersion());
+                                publisher.getRegisterId(), event.getOccurredTimestamp()),
+                                event.getDataCenter(), event.getVersion());
                         datum.setContainsUnPub(true);
                         handleDatum(DataChangeTypeEnum.MERGE, DataSourceTypeEnum.PUB, datum);
                         count++;
                     }
                 }
                 LOGGER
-                    .info(
-                        "[{}] client off handle, connectId={}, occurTimestamp={}, version={}, handle pubSize={}",
-                        getName(), connectId, event.getOccurredTimestamp(), event.getVersion(),
-                        count);
+                        .info(
+                                "[{}] client off handle, connectId={}, occurTimestamp={}, version={}, handle pubSize={}",
+                                getName(), connectId, event.getOccurredTimestamp(), event.getVersion(),
+                                count);
+            } else {
+                LOGGER.info("[{}] no datum to handle, connectId={}", getName(), connectId);
             }
         }
     }

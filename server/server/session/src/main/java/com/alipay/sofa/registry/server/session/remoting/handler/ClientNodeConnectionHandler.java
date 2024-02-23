@@ -16,16 +16,6 @@
  */
 package com.alipay.sofa.registry.server.session.remoting.handler;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
-import javax.annotation.PostConstruct;
-
-import org.apache.commons.lang.math.RandomUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.alipay.sofa.registry.common.model.constants.ValueConstants;
 import com.alipay.sofa.registry.common.model.store.URL;
 import com.alipay.sofa.registry.log.Logger;
@@ -44,6 +34,14 @@ import com.alipay.sofa.registry.server.session.store.Watchers;
 import com.alipay.sofa.registry.timer.AsyncHashedWheelTimer.TaskFailedCallback;
 import com.alipay.sofa.registry.timer.RecycleAsyncHashedWheelTimer;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import org.apache.commons.lang.math.RandomUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import javax.annotation.PostConstruct;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  *
@@ -124,8 +122,7 @@ public class ClientNodeConnectionHandler extends AbstractServerHandler {
         //avoid block connect ConnectionEventExecutor thread pool
         executorManager.getConnectClientExecutor().execute(() -> {
 
-            String connectId = NetUtil.toAddressString(channel.getRemoteAddress()) + ValueConstants.CONNECT_ID_SPLIT +
-                    NetUtil.toAddressString(channel.getLocalAddress());
+            String connectId = NetUtil.toAddressString(channel.getRemoteAddress());
             if (checkCache(connectId)) {
                 List<String> connectIds = new ArrayList<>();
                 connectIds.add(connectId);
@@ -160,13 +157,12 @@ public class ClientNodeConnectionHandler extends AbstractServerHandler {
 
     private void fireRenewDatum(Channel channel) {
         executorManager.getConnectClientExecutor().execute(() -> {
-            String connectId = NetUtil.toAddressString(channel.getRemoteAddress()) + ValueConstants.CONNECT_ID_SPLIT
-                    + NetUtil.toAddressString(channel.getLocalAddress());
+            String connectId = NetUtil.toAddressString(channel.getRemoteAddress());
             RENEW_LOGGER.info("Renew task is started: {}", connectId);
             recycleAsyncHashedWheelTimer.newTimeout(timerOut -> sessionRegistry.renewDatum(connectId), randomDelay(),
                     sessionServerConfig.getRenewDatumWheelTaskDelaySec(), TimeUnit.SECONDS, () -> {
                         Server sessionServer = boltExchange.getServer(sessionServerConfig.getServerPort());
-                        Channel channelClient = sessionServer.getChannel(URL.valueOf(connectId.split(ValueConstants.CONNECT_ID_SPLIT)[0]));
+                        Channel channelClient = sessionServer.getChannel(URL.valueOf(connectId));
                         boolean shouldContinue = channelClient != null && channel.isConnected();
                         if (!shouldContinue) {
                             RENEW_LOGGER.info("Renew task is stop: {}", connectId);

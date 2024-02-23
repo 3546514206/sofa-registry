@@ -21,7 +21,6 @@ import com.alipay.sofa.registry.log.LoggerFactory;
 import com.alipay.sofa.registry.server.meta.bootstrap.EnableMetaServer;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  *
@@ -29,7 +28,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  * @version $Id: MetaApplication.java, v 0.1 2017-11-13 19:03 zhuoyu.sjw Exp $$
  */
 @EnableMetaServer
-@EnableScheduling
 @SpringBootApplication
 public class MetaApplication {
 
@@ -38,9 +36,7 @@ public class MetaApplication {
     public static void main(String[] args) {
         // setup DefaultUncaughtExceptionHandler
         Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
-            LOGGER.error(
-                String.format("UncaughtException in Thread(%s): %s", t.getName(), e.getMessage()),
-                e);
+            LOGGER.error(String.format("UncaughtException in Thread(%s): %s", t.getName(), e.getMessage()), e);
         });
 
         SpringApplication.run(MetaApplication.class, args);

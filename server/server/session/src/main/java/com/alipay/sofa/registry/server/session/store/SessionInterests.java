@@ -16,6 +16,17 @@
  */
 package com.alipay.sofa.registry.server.session.store;
 
+import com.alipay.sofa.registry.common.model.store.Subscriber;
+import com.alipay.sofa.registry.common.model.store.WordCache;
+import com.alipay.sofa.registry.core.model.ScopeEnum;
+import com.alipay.sofa.registry.log.Logger;
+import com.alipay.sofa.registry.log.LoggerFactory;
+import com.alipay.sofa.registry.server.session.bootstrap.SessionServerConfig;
+import com.alipay.sofa.registry.server.session.cache.SubscriberResult;
+import com.alipay.sofa.registry.util.VersionsMapUtils;
+import com.google.common.collect.Lists;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import java.net.InetSocketAddress;
 import java.util.Collection;
 import java.util.Iterator;
@@ -27,20 +38,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
-import com.alipay.sofa.registry.common.model.constants.ValueConstants;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.alipay.sofa.registry.common.model.store.Subscriber;
-import com.alipay.sofa.registry.common.model.store.WordCache;
-import com.alipay.sofa.registry.core.model.ScopeEnum;
-import com.alipay.sofa.registry.log.Logger;
-import com.alipay.sofa.registry.log.LoggerFactory;
-import com.alipay.sofa.registry.server.session.bootstrap.SessionServerConfig;
-import com.alipay.sofa.registry.server.session.cache.SubscriberResult;
-import com.alipay.sofa.registry.util.VersionsMapUtils;
-import com.google.common.collect.Lists;
-
 /**
+ *
  * @author shangyu.wh
  * @version $Id: AbstractSessionInterests.java, v 0.1 2017-11-30 20:42 shangyu.wh Exp $
  */
@@ -95,10 +94,6 @@ public class SessionInterests implements Interests, ReSubscribers {
             if (existingSubscriber != null) {
                 LOGGER.warn("There is subscriber already exists,it will be overwrite! {}",
                     existingSubscriber);
-                if (sessionServerConfig.isStopPushSwitch()) {
-                    deleteReSubscriber(existingSubscriber);
-                }
-                invalidateIndex(existingSubscriber);
             }
 
             subscribers.put(subscriber.getRegisterId(), subscriber);
@@ -156,10 +151,7 @@ public class SessionInterests implements Interests, ReSubscribers {
             for (Map<String, Subscriber> map : interests.values()) {
                 for (Iterator it = map.values().iterator(); it.hasNext();) {
                     Subscriber subscriber = (Subscriber) it.next();
-                    if (connectId.equals(WordCache.getInstance().getWordCache(
-                        subscriber.getSourceAddress().getAddressString()
-                                + ValueConstants.CONNECT_ID_SPLIT
-                                + subscriber.getTargetAddress().getAddressString()))) {
+                    if (connectId.equals(subscriber.getSourceAddress().getAddressString())) {
 
                         it.remove();
                         if (sessionServerConfig.isStopPushSwitch()) {
@@ -170,8 +162,6 @@ public class SessionInterests implements Interests, ReSubscribers {
                     }
                 }
             }
-            //force remove connectId
-            invalidateConnectIndex(connectId);
             return true;
         } catch (Exception e) {
             LOGGER.error("Delete subscriber by connectId {} error!", connectId, e);
@@ -294,14 +284,12 @@ public class SessionInterests implements Interests, ReSubscribers {
     }
 
     private void invalidateIndex(Subscriber subscriber) {
-        removeConnectIndex(subscriber);
+        invalidateConnectIndex(subscriber.getSourceAddress().getAddressString());
         invalidateResultIndex(subscriber);
     }
 
     private void addConnectIndex(Subscriber subscriber) {
-        String connectId = subscriber.getSourceAddress().getAddressString()
-                           + ValueConstants.CONNECT_ID_SPLIT
-                           + subscriber.getTargetAddress().getAddressString();
+        String connectId = subscriber.getSourceAddress().getAddressString();
         connectId = WordCache.getInstance().getWordCache(connectId);
 
         Map<String/*registerId*/, Subscriber> subscriberMap = connectIndex.get(connectId);
@@ -345,9 +333,7 @@ public class SessionInterests implements Interests, ReSubscribers {
     }
 
     private void removeConnectIndex(Subscriber subscriber) {
-        String connectId = subscriber.getSourceAddress().getAddressString()
-                           + ValueConstants.CONNECT_ID_SPLIT
-                           + subscriber.getTargetAddress().getAddressString();
+        String connectId = subscriber.getSourceAddress().getAddressString();
         Map<String/*registerId*/, Subscriber> subscriberMap = connectIndex.get(connectId);
         if (subscriberMap != null) {
             subscriberMap.remove(subscriber.getRegisterId());

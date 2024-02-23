@@ -16,20 +16,10 @@
  */
 package com.alipay.sofa.registry.server.session.registry;
 
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
-
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.alipay.sofa.registry.common.model.Node;
 import com.alipay.sofa.registry.common.model.RenewDatumRequest;
 import com.alipay.sofa.registry.common.model.constants.ValueConstants;
-import com.alipay.sofa.registry.common.model.store.Publisher;
-import com.alipay.sofa.registry.common.model.store.StoreData;
-import com.alipay.sofa.registry.common.model.store.Subscriber;
-import com.alipay.sofa.registry.common.model.store.URL;
-import com.alipay.sofa.registry.common.model.store.Watcher;
+import com.alipay.sofa.registry.common.model.store.*;
 import com.alipay.sofa.registry.log.Logger;
 import com.alipay.sofa.registry.log.LoggerFactory;
 import com.alipay.sofa.registry.remoting.Channel;
@@ -51,8 +41,16 @@ import com.alipay.sofa.registry.server.session.wrapper.WrapperInterceptorManager
 import com.alipay.sofa.registry.server.session.wrapper.WrapperInvocation;
 import com.alipay.sofa.registry.task.listener.TaskEvent;
 import com.alipay.sofa.registry.task.listener.TaskListenerManager;
+import com.google.common.collect.Sets;
+import com.google.common.collect.Sets.SetView;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
 /**
+ *
  * @author shangyu.wh
  * @version $Id: AbstractSessionRegistry.java, v 0.1 2017-11-30 18:13 shangyu.wh Exp $
  */
@@ -156,8 +154,7 @@ public class SessionRegistry implements Registry {
 
                                     @Override
                                     public String getConnectId() {
-                                        return publisher.getSourceAddress().getAddressString() + ValueConstants.CONNECT_ID_SPLIT
-                                                + publisher.getTargetAddress().getAddressString();
+                                        return publisher.getSourceAddress().getAddressString();
                                     }
 
                                     @Override
@@ -228,9 +225,7 @@ public class SessionRegistry implements Registry {
 
                     @Override
                     public String getConnectId() {
-                        return publisher.getSourceAddress().getAddressString()
-                               + ValueConstants.CONNECT_ID_SPLIT
-                               + publisher.getTargetAddress().getAddressString();
+                        return publisher.getSourceAddress().getAddressString();
                     }
 
                     @Override
@@ -412,24 +407,18 @@ public class SessionRegistry implements Registry {
 
     public void cleanClientConnect() {
 
-        Set<String> connectIndexes = new HashSet<>();
-        Set<String> pubIndexes = sessionDataStore.getConnectPublishers().keySet();
-        Set<String> subIndexes = sessionInterests.getConnectSubscribers().keySet();
-        Set<String> watchIndexes = sessionWatchers.getConnectWatchers().keySet();
-        connectIndexes.addAll(pubIndexes);
-        connectIndexes.addAll(subIndexes);
-        connectIndexes.addAll(watchIndexes);
+        SetView<String> intersection = Sets.union(sessionDataStore.getConnectPublishers().keySet(),
+                sessionInterests.getConnectSubscribers().keySet());
 
         Server sessionServer = boltExchange.getServer(sessionServerConfig.getServerPort());
 
         List<String> connectIds = new ArrayList<>();
-        for (String connectId : connectIndexes) {
-            String[] parts = connectId.split(ValueConstants.CONNECT_ID_SPLIT);
-            Channel channel = sessionServer.getChannel(URL.valueOf(parts[0]));
+        for (String connectId : intersection) {
+            Channel channel = sessionServer.getChannel(URL.valueOf(connectId));
             if (channel == null) {
                 connectIds.add(connectId);
                 LOGGER.warn("Client connect has not existed!it must be remove!connectId:{}",
-                    connectId);
+                        connectId);
             }
         }
         if (!connectIds.isEmpty()) {

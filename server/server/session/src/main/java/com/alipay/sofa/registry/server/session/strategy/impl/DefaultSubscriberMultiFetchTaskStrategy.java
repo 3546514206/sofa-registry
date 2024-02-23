@@ -16,17 +16,6 @@
  */
 package com.alipay.sofa.registry.server.session.strategy.impl;
 
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import com.google.common.collect.Lists;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.alipay.sofa.registry.common.model.Node;
 import com.alipay.sofa.registry.common.model.constants.ValueConstants;
 import com.alipay.sofa.registry.common.model.dataserver.Datum;
@@ -38,11 +27,7 @@ import com.alipay.sofa.registry.core.model.ScopeEnum;
 import com.alipay.sofa.registry.log.Logger;
 import com.alipay.sofa.registry.log.LoggerFactory;
 import com.alipay.sofa.registry.server.session.bootstrap.SessionServerConfig;
-import com.alipay.sofa.registry.server.session.cache.CacheAccessException;
-import com.alipay.sofa.registry.server.session.cache.CacheService;
-import com.alipay.sofa.registry.server.session.cache.DatumKey;
-import com.alipay.sofa.registry.server.session.cache.Key;
-import com.alipay.sofa.registry.server.session.cache.Value;
+import com.alipay.sofa.registry.server.session.cache.*;
 import com.alipay.sofa.registry.server.session.converter.ReceivedDataConverter;
 import com.alipay.sofa.registry.server.session.node.NodeManager;
 import com.alipay.sofa.registry.server.session.node.NodeManagerFactory;
@@ -52,6 +37,11 @@ import com.alipay.sofa.registry.server.session.strategy.SubscriberMultiFetchTask
 import com.alipay.sofa.registry.server.session.utils.DatumUtils;
 import com.alipay.sofa.registry.task.listener.TaskEvent;
 import com.alipay.sofa.registry.task.listener.TaskListenerManager;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.net.InetSocketAddress;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author xuanbei
@@ -245,8 +235,6 @@ public class DefaultSubscriberMultiFetchTaskStrategy implements SubscriberMultiF
         parameter.put(receivedData, subscriber.getSourceAddress());
         TaskEvent taskEvent = new TaskEvent(parameter,
             TaskEvent.TaskType.RECEIVED_DATA_MULTI_PUSH_TASK);
-        // setup PUSH_CLIENT_SUBSCRIBERS, which is used in AlipayPushTaskMergeProcessor
-        taskEvent.setAttribute(Constant.PUSH_CLIENT_SUBSCRIBERS, Lists.newArrayList(subscriber));
         taskLogger.info("send {} taskURL:{},taskScope:{}", taskEvent.getTaskType(),
             subscriber.getSourceAddress(), subscriber.getScope());
         taskListenerManager.sendTaskEvent(taskEvent);

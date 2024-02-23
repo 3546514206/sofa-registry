@@ -16,19 +16,11 @@
  */
 package com.alipay.sofa.registry.server.data.executor;
 
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Executor;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
 import com.alipay.sofa.registry.log.Logger;
 import com.alipay.sofa.registry.log.LoggerFactory;
-import com.alipay.sofa.registry.server.data.util.DataMetricsThreadPoolExecutor;
 import com.alipay.sofa.registry.util.NamedThreadFactory;
+
+import java.util.concurrent.*;
 
 /**
  * the factory to create executor
@@ -44,8 +36,8 @@ public class ExecutorFactory {
 
     static {
         BlockingQueue<Runnable> workQueue = new ArrayBlockingQueue<>(10);
-        EXECUTOR = new DataMetricsThreadPoolExecutor("CommonExecutor", 20, 300, 1, TimeUnit.HOURS,
-            workQueue, new NamedThreadFactory("CommonExecutor")) {
+        EXECUTOR = new ThreadPoolExecutor(20, 300, 1, TimeUnit.HOURS, workQueue,
+                new NamedThreadFactory("CommonExecutor")) {
 
             /**
              * @see ThreadPoolExecutor#afterExecute(Runnable, Throwable)
@@ -55,16 +47,14 @@ public class ExecutorFactory {
                 super.afterExecute(r, t);
                 if (t != null) {
                     LOGGER.error("[CommonThreadPool] ThreadPoolUncaughtException:{}",
-                        t.getMessage(), t);
+                            t.getMessage(), t);
                 }
             }
         };
 
-        NOTIFY_SESSION_CALLBACK_EXECUTOR = new DataMetricsThreadPoolExecutor(
-            "NotifySessionCallbackExecutor", 10, 20, 300, TimeUnit.SECONDS,
-            new LinkedBlockingQueue<>(100000), new NamedThreadFactory(
-                "NotifySessionCallbackExecutor", true));
-
+        NOTIFY_SESSION_CALLBACK_EXECUTOR = new ThreadPoolExecutor(10, 20, 300, TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(100000), new NamedThreadFactory(
+                "NotifySessionCallback-executor", true));
     }
 
     /**

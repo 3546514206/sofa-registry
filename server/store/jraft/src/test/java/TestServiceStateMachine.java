@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 import com.alipay.sofa.jraft.Closure;
 import com.alipay.sofa.jraft.Iterator;
 import com.alipay.sofa.jraft.Status;
@@ -25,21 +26,13 @@ import com.alipay.sofa.jraft.storage.snapshot.SnapshotWriter;
 import com.alipay.sofa.registry.jraft.bootstrap.ServiceStateMachine;
 import com.alipay.sofa.registry.jraft.command.ProcessRequest;
 import com.alipay.sofa.registry.jraft.command.ProcessResponse;
-import com.alipay.sofa.registry.jraft.processor.FollowerProcessListener;
-import com.alipay.sofa.registry.jraft.processor.LeaderProcessListener;
-import com.alipay.sofa.registry.jraft.processor.LeaderTaskClosure;
-import com.alipay.sofa.registry.jraft.processor.Processor;
-import com.alipay.sofa.registry.jraft.processor.SnapshotProcess;
+import com.alipay.sofa.registry.jraft.processor.*;
 import com.caucho.hessian.io.Hessian2Output;
 import com.caucho.hessian.io.SerializerFactory;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.CodedOutputStream;
+import com.google.protobuf.*;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Descriptors.OneofDescriptor;
-import com.google.protobuf.Message;
-import com.google.protobuf.Parser;
-import com.google.protobuf.UnknownFieldSet;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -47,13 +40,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -214,7 +201,6 @@ public class TestServiceStateMachine {
         Processor processor = Processor.getInstance();
         LeaderTaskClosure leaderTaskClosure = new LeaderTaskClosure();
         AtomicReference<Status> status = new AtomicReference<>();
-        serviceStateMachine.setExecutor(new ThreadPoolExecutor(1, 2, 0, TimeUnit.SECONDS, new LinkedBlockingQueue<>(20)));
         leaderTaskClosure.setDone(statusIn -> {
             status.set(statusIn);
         });
@@ -308,8 +294,6 @@ public class TestServiceStateMachine {
     @Test
     public void testOnSnapshotLoad() throws InterruptedException {
         ServiceStateMachine serviceStateMachine = ServiceStateMachine.getInstance();
-        serviceStateMachine.setExecutor(new ThreadPoolExecutor(1, 2, 0, TimeUnit.SECONDS,
-            new LinkedBlockingQueue<>(20)));
         Processor processor = Processor.getInstance();
         SnapshotProcess process = new SnapshotProcess() {
 
@@ -511,8 +495,6 @@ public class TestServiceStateMachine {
     @Test
     public void testRemain() throws InterruptedException {
         ServiceStateMachine serviceStateMachine = ServiceStateMachine.getInstance();
-        serviceStateMachine.setExecutor(new ThreadPoolExecutor(1, 2, 0, TimeUnit.SECONDS,
-            new LinkedBlockingQueue<>(20)));
 
         AtomicInteger leaderstart = new AtomicInteger();
         AtomicInteger leaderstop = new AtomicInteger();

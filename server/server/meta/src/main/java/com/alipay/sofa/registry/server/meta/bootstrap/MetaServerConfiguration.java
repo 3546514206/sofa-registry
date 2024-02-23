@@ -16,25 +16,6 @@
  */
 package com.alipay.sofa.registry.server.meta.bootstrap;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
-import com.alipay.sofa.registry.server.meta.executor.MetaMetricsThreadPoolExecutor;
-import com.alipay.sofa.registry.server.meta.remoting.handler.*;
-import com.alipay.sofa.registry.server.meta.timertask.LogMetricsTask;
-import com.alipay.sofa.registry.util.NamedThreadFactory;
-import com.alipay.sofa.registry.server.meta.resource.*;
-import org.glassfish.jersey.jackson.JacksonFeature;
-import org.glassfish.jersey.server.ResourceConfig;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
-
 import com.alipay.sofa.registry.jraft.service.PersistenceDataDBService;
 import com.alipay.sofa.registry.remoting.bolt.exchange.BoltExchange;
 import com.alipay.sofa.registry.remoting.exchange.Exchange;
@@ -51,24 +32,17 @@ import com.alipay.sofa.registry.server.meta.node.impl.MetaNodeServiceImpl;
 import com.alipay.sofa.registry.server.meta.node.impl.SessionNodeServiceImpl;
 import com.alipay.sofa.registry.server.meta.registry.MetaServerRegistry;
 import com.alipay.sofa.registry.server.meta.registry.Registry;
-import com.alipay.sofa.registry.server.meta.remoting.DataNodeExchanger;
-import com.alipay.sofa.registry.server.meta.remoting.MetaClientExchanger;
-import com.alipay.sofa.registry.server.meta.remoting.MetaServerExchanger;
-import com.alipay.sofa.registry.server.meta.remoting.RaftExchanger;
-import com.alipay.sofa.registry.server.meta.remoting.SessionNodeExchanger;
+import com.alipay.sofa.registry.server.meta.remoting.*;
 import com.alipay.sofa.registry.server.meta.remoting.connection.DataConnectionHandler;
 import com.alipay.sofa.registry.server.meta.remoting.connection.MetaConnectionHandler;
 import com.alipay.sofa.registry.server.meta.remoting.connection.SessionConnectionHandler;
+import com.alipay.sofa.registry.server.meta.remoting.handler.*;
 import com.alipay.sofa.registry.server.meta.repository.NodeConfirmStatusService;
 import com.alipay.sofa.registry.server.meta.repository.RepositoryService;
 import com.alipay.sofa.registry.server.meta.repository.VersionRepositoryService;
 import com.alipay.sofa.registry.server.meta.repository.annotation.RaftAnnotationBeanPostProcessor;
-import com.alipay.sofa.registry.server.meta.repository.service.DataConfirmStatusService;
-import com.alipay.sofa.registry.server.meta.repository.service.DataRepositoryService;
-import com.alipay.sofa.registry.server.meta.repository.service.MetaRepositoryService;
-import com.alipay.sofa.registry.server.meta.repository.service.SessionConfirmStatusService;
-import com.alipay.sofa.registry.server.meta.repository.service.SessionRepositoryService;
-import com.alipay.sofa.registry.server.meta.repository.service.SessionVersionRepositoryService;
+import com.alipay.sofa.registry.server.meta.repository.service.*;
+import com.alipay.sofa.registry.server.meta.resource.*;
 import com.alipay.sofa.registry.server.meta.store.DataStoreService;
 import com.alipay.sofa.registry.server.meta.store.MetaStoreService;
 import com.alipay.sofa.registry.server.meta.store.SessionStoreService;
@@ -82,6 +56,16 @@ import com.alipay.sofa.registry.task.listener.DefaultTaskListenerManager;
 import com.alipay.sofa.registry.task.listener.TaskListener;
 import com.alipay.sofa.registry.task.listener.TaskListenerManager;
 import com.alipay.sofa.registry.util.PropertySplitter;
+import org.glassfish.jersey.jackson.JacksonFeature;
+import org.glassfish.jersey.server.ResourceConfig;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  *
@@ -360,11 +344,6 @@ public class MetaServerConfiguration {
         public RenewSwitchResource renewSwitchResource() {
             return new RenewSwitchResource();
         }
-
-        @Bean
-        public SessionLoadbalanceResource sessionLoadbalanceSwitchResource() {
-            return new SessionLoadbalanceResource();
-        }
     }
 
     @Configuration
@@ -431,17 +410,6 @@ public class MetaServerConfiguration {
             return new ExecutorManager(metaServerConfig);
         }
 
-        @Bean
-        public ThreadPoolExecutor defaultRequestExecutor(MetaServerConfig metaServerConfig) {
-            ThreadPoolExecutor defaultRequestExecutor = new MetaMetricsThreadPoolExecutor(
-                "DefaultRequestExecutor", metaServerConfig.getDefaultRequestExecutorMinSize(),
-                metaServerConfig.getDefaultRequestExecutorMaxSize(), 300, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>(metaServerConfig.getDefaultRequestExecutorQueueSize()),
-                new NamedThreadFactory("DefaultRequestExecutor"));
-            defaultRequestExecutor.allowCoreThreadTimeOut(true);
-            return defaultRequestExecutor;
-        }
-
     }
 
     @Configuration
@@ -449,16 +417,6 @@ public class MetaServerConfiguration {
         @Bean
         public DBService persistenceDataDBService() {
             return new PersistenceDataDBService();
-        }
-    }
-
-    @Configuration
-    public static class TimerTask {
-
-        @Bean
-        public LogMetricsTask logMetricsTask() {
-            return new LogMetricsTask();
-
         }
     }
 }

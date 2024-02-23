@@ -16,15 +16,6 @@
  */
 package com.alipay.sofa.registry.server.data.remoting.dataserver.handler;
 
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Executor;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.alipay.remoting.Connection;
 import com.alipay.sofa.registry.common.model.CommonResponse;
 import com.alipay.sofa.registry.common.model.Node;
@@ -45,9 +36,12 @@ import com.alipay.sofa.registry.server.data.remoting.dataserver.GetSyncDataHandl
 import com.alipay.sofa.registry.server.data.remoting.dataserver.SyncDataCallback;
 import com.alipay.sofa.registry.server.data.remoting.handler.AbstractClientHandler;
 import com.alipay.sofa.registry.server.data.util.LocalServerStatusEnum;
-import com.alipay.sofa.registry.server.data.util.DataMetricsThreadPoolExecutor;
+import com.alipay.sofa.registry.server.data.util.ThreadPoolExecutorDataServer;
 import com.alipay.sofa.registry.util.NamedThreadFactory;
 import com.alipay.sofa.registry.util.ParaCheckUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.concurrent.*;
 
 /**
  *
@@ -161,12 +155,12 @@ public class NotifyDataSyncHandler extends AbstractClientHandler<NotifyDataSyncR
     @Override
     public Executor getExecutor() {
         if (notifyExecutor == null) {
-            notifyExecutor = new DataMetricsThreadPoolExecutor("NotifyDataSyncProcessorExecutor",
-                dataServerConfig.getNotifyDataSyncExecutorMinPoolSize(),
-                dataServerConfig.getNotifyDataSyncExecutorMaxPoolSize(),
-                dataServerConfig.getNotifyDataSyncExecutorKeepAliveTime(), TimeUnit.SECONDS,
-                new ArrayBlockingQueue<>(dataServerConfig.getNotifyDataSyncExecutorQueueSize()),
-                new NamedThreadFactory("DataServer-NotifyDataSyncProcessor-executor", true));
+            notifyExecutor = new ThreadPoolExecutorDataServer("NotifyDataSyncProcessorExecutor",
+                    dataServerConfig.getNotifyDataSyncExecutorMinPoolSize(),
+                    dataServerConfig.getNotifyDataSyncExecutorMaxPoolSize(),
+                    dataServerConfig.getNotifyDataSyncExecutorKeepAliveTime(), TimeUnit.SECONDS,
+                    new ArrayBlockingQueue<>(dataServerConfig.getNotifyDataSyncExecutorQueueSize()),
+                    new NamedThreadFactory("DataServer-NotifyDataSyncProcessor-executor", true));
         }
         return notifyExecutor;
     }

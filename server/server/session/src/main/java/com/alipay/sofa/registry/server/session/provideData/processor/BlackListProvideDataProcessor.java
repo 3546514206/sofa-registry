@@ -31,12 +31,7 @@ import com.alipay.sofa.registry.server.session.provideData.ProvideDataProcessor;
 import com.alipay.sofa.registry.server.session.registry.Registry;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  *
@@ -119,8 +114,7 @@ public class BlackListProvideDataProcessor implements ProvideDataProcessor {
                 String key = NetUtil.toAddressString(channel.getRemoteAddress());
                 String ip = key.substring(0, key.indexOf(":"));
                 if (_ipList.contains(ip)) {
-                    connections.add(key + ValueConstants.CONNECT_ID_SPLIT
-                                    + NetUtil.toAddressString(channel.getLocalAddress()));
+                    connections.add(key);
                 }
             }
         }

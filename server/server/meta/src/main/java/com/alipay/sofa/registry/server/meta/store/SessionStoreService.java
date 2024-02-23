@@ -16,28 +16,12 @@
  */
 package com.alipay.sofa.registry.server.meta.store;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.stream.Collectors;
-
-import javax.ws.rs.NotSupportedException;
-
-import com.alipay.sofa.registry.common.model.metaserver.*;
-import com.alipay.sofa.registry.server.meta.bootstrap.MetaServerConfig;
-import com.alipay.sofa.registry.server.meta.bootstrap.ServiceFactory;
-import com.alipay.sofa.registry.server.meta.node.SessionNodeService;
-import com.alipay.sofa.registry.store.api.DBService;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.alipay.sofa.registry.common.model.Node;
 import com.alipay.sofa.registry.common.model.Node.NodeType;
+import com.alipay.sofa.registry.common.model.metaserver.DataCenterNodes;
+import com.alipay.sofa.registry.common.model.metaserver.DataOperator;
+import com.alipay.sofa.registry.common.model.metaserver.NodeChangeResult;
+import com.alipay.sofa.registry.common.model.metaserver.SessionNode;
 import com.alipay.sofa.registry.log.Logger;
 import com.alipay.sofa.registry.log.LoggerFactory;
 import com.alipay.sofa.registry.server.meta.bootstrap.NodeConfig;
@@ -50,8 +34,16 @@ import com.alipay.sofa.registry.store.api.annotation.RaftReference;
 import com.alipay.sofa.registry.task.listener.TaskEvent;
 import com.alipay.sofa.registry.task.listener.TaskEvent.TaskType;
 import com.alipay.sofa.registry.task.listener.TaskListenerManager;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import javax.ws.rs.NotSupportedException;
+import java.util.*;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.stream.Collectors;
 
 /**
+ *
  * @author shangyu.wh
  * @version $Id: SessionStoreService.java, v 0.1 2018-01-12 14:14 shangyu.wh Exp $
  */
@@ -75,8 +67,6 @@ public class SessionStoreService implements StoreService<SessionNode> {
     private StoreService                                          dataStoreService;
     @Autowired
     private NodeConfig                                            nodeConfig;
-    @Autowired
-    private MetaServerConfig                                      metaServerConfig;
 
     @RaftReference(uniqueId = "sessionServer")
     private RepositoryService<String, RenewDecorate<SessionNode>> sessionRepositoryService;
@@ -86,9 +76,6 @@ public class SessionStoreService implements StoreService<SessionNode> {
 
     @RaftReference(uniqueId = "sessionServer")
     private NodeConfirmStatusService<SessionNode>                 sessionConfirmStatusService;
-
-    @RaftReference
-    private DBService                                             dbService;
 
     @Override
     public NodeType getNodeType() {
@@ -328,8 +315,7 @@ public class SessionStoreService implements StoreService<SessionNode> {
         Map<String, Map<String, SessionNode>> map = nodeChangeResult.getNodes();
         Map<String, SessionNode> addNodes = map.get(nodeConfig.getLocalDataCenter());
         if (addNodes != null && !addNodes.isEmpty()) {
-            return waitNotifyNodes.stream().filter(ip -> !addNodes.keySet().contains(ip))
-                    .collect(Collectors.toSet());
+            return waitNotifyNodes.stream().filter(ip -> !addNodes.keySet().contains(ip)).collect(Collectors.toSet());
         }
         return new HashSet<>();
     }
@@ -367,8 +353,7 @@ public class SessionStoreService implements StoreService<SessionNode> {
             nodes.put(localDataCenter, tmpMap);
 
             nodeChangeResult.setNodes(nodes);
-            nodeChangeResult.setVersion(
-                    sessionVersionRepositoryService.getVersion(nodeConfig.getLocalDataCenter()));
+            nodeChangeResult.setVersion(sessionVersionRepositoryService.getVersion(nodeConfig.getLocalDataCenter()));
         } finally {
             read.unlock();
         }
@@ -394,46 +379,6 @@ public class SessionStoreService implements StoreService<SessionNode> {
         throw new NotSupportedException("Node type SESSION not support function");
     }
 
-    private Map<String, Integer> zoneMaxConnections(Map<String, LoadbalanceMetrics> nodes, int maxDisconnect) {
-        double thresholdRatio = metaServerConfig.getSessionLoadbalanceThresholdRatio();
-        Map<String, Integer> maxConnectionsMap = new HashMap<>();
-        if (nodes.size() == 0) {
-            return maxConnectionsMap;
-        }
-        double avg = nodes.values().stream().mapToInt(LoadbalanceMetrics::getConnectionCount)
-                .average().getAsDouble();
-        for (String ipAddress : nodes.keySet()) {
-            LoadbalanceMetrics m = nodes.get(ipAddress);
-            int maxConnections = (int) Math
-                    .ceil(Math.max(avg * thresholdRatio, m.getConnectionCount() - maxDisconnect));
-            maxConnectionsMap.put(ipAddress, maxConnections);
-        }
-        return maxConnectionsMap;
-    }
-
-    public Map<String /*category*/, Map<String /*zone*/, Map<String /*address*/, Integer /*connections*/>>> sessionLoadbalance(int maxDisconnect) {
-        Map<String, Map<String, Map<String, Integer>>> result = new HashMap<>();
-        Map<String, Map<String, Integer>> sourceConnections = new HashMap<>();
-
-        SessionNodeService sessionNodeService = (SessionNodeService) ServiceFactory
-                .getNodeService(NodeType.SESSION);
-        Map<String /* zone */, Map<String /*ipAddress*/, LoadbalanceMetrics>> zones = sessionNodeService
-                .fetchLoadbalanceMetrics();
-        Map<String, Map<String, Integer>> zonesMaxConnectionsMap = new HashMap<>();
-        for (String zoneName : zones.keySet()) {
-            Map<String, LoadbalanceMetrics> nodes = zones.get(zoneName);
-
-            Map<String, Integer> maxConnectionsMap = zoneMaxConnections(nodes, maxDisconnect);
-            zonesMaxConnectionsMap.put(zoneName, maxConnectionsMap);
-
-            sourceConnections.put(zoneName, nodes.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getConnectionCount())));
-        }
-        sessionNodeService.configureLoadbalance(zonesMaxConnectionsMap);
-        result.put("source", sourceConnections);
-        result.put("target", zonesMaxConnectionsMap);
-        return result;
-    }
-
     /**
      * Setter method for property <tt>taskListenerManager</tt>.
      *
@@ -446,7 +391,7 @@ public class SessionStoreService implements StoreService<SessionNode> {
     /**
      * Setter method for property <tt>dataStoreService</tt>.
      *
-     * @param dataStoreService value to be assigned to property dataStoreService
+     * @param dataStoreService  value to be assigned to property dataStoreService
      */
     public void setDataStoreService(StoreService dataStoreService) {
         this.dataStoreService = dataStoreService;
@@ -455,7 +400,7 @@ public class SessionStoreService implements StoreService<SessionNode> {
     /**
      * Setter method for property <tt>nodeConfig</tt>.
      *
-     * @param nodeConfig value to be assigned to property nodeConfig
+     * @param nodeConfig  value to be assigned to property nodeConfig
      */
     public void setNodeConfig(NodeConfig nodeConfig) {
         this.nodeConfig = nodeConfig;
@@ -464,7 +409,7 @@ public class SessionStoreService implements StoreService<SessionNode> {
     /**
      * Setter method for property <tt>sessionRepositoryService</tt>.
      *
-     * @param sessionRepositoryService value to be assigned to property sessionRepositoryService
+     * @param sessionRepositoryService  value to be assigned to property sessionRepositoryService
      */
     public void setSessionRepositoryService(RepositoryService<String, RenewDecorate<SessionNode>> sessionRepositoryService) {
         this.sessionRepositoryService = sessionRepositoryService;
@@ -473,7 +418,7 @@ public class SessionStoreService implements StoreService<SessionNode> {
     /**
      * Setter method for property <tt>sessionVersionRepositoryService</tt>.
      *
-     * @param sessionVersionRepositoryService value to be assigned to property sessionVersionRepositoryService
+     * @param sessionVersionRepositoryService  value to be assigned to property sessionVersionRepositoryService
      */
     public void setSessionVersionRepositoryService(VersionRepositoryService<String> sessionVersionRepositoryService) {
         this.sessionVersionRepositoryService = sessionVersionRepositoryService;
@@ -491,7 +436,7 @@ public class SessionStoreService implements StoreService<SessionNode> {
     /**
      * Setter method for property <tt>sessionConfirmStatusService</tt>.
      *
-     * @param sessionConfirmStatusService value to be assigned to property sessionConfirmStatusService
+     * @param sessionConfirmStatusService  value to be assigned to property sessionConfirmStatusService
      */
     public void setSessionConfirmStatusService(NodeConfirmStatusService<SessionNode> sessionConfirmStatusService) {
         this.sessionConfirmStatusService = sessionConfirmStatusService;

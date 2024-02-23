@@ -16,32 +16,11 @@
  */
 package com.alipay.sofa.registry.server.data.remoting.metaserver;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
-
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.alipay.remoting.Connection;
 import com.alipay.sofa.jraft.entity.PeerId;
 import com.alipay.sofa.registry.common.model.Node.NodeType;
 import com.alipay.sofa.registry.common.model.constants.ValueConstants;
-import com.alipay.sofa.registry.common.model.metaserver.DataNode;
-import com.alipay.sofa.registry.common.model.metaserver.FetchProvideDataRequest;
-import com.alipay.sofa.registry.common.model.metaserver.GetNodesRequest;
-import com.alipay.sofa.registry.common.model.metaserver.MetaNode;
-import com.alipay.sofa.registry.common.model.metaserver.NodeChangeResult;
-import com.alipay.sofa.registry.common.model.metaserver.ProvideData;
-import com.alipay.sofa.registry.common.model.metaserver.RenewNodesRequest;
+import com.alipay.sofa.registry.common.model.metaserver.*;
 import com.alipay.sofa.registry.common.model.store.URL;
 import com.alipay.sofa.registry.jraft.bootstrap.RaftClient;
 import com.alipay.sofa.registry.log.Logger;
@@ -55,6 +34,12 @@ import com.alipay.sofa.registry.server.data.cache.DataServerChangeItem;
 import com.alipay.sofa.registry.server.data.node.DataServerNode;
 import com.alipay.sofa.registry.server.data.remoting.MetaNodeExchanger;
 import com.alipay.sofa.registry.server.data.remoting.dataserver.DataServerNodeFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -68,9 +53,6 @@ public class DefaultMetaServiceImpl implements IMetaServerService {
 
     @Autowired
     private DataServerConfig            dataServerConfig;
-
-    @Autowired
-    private ThreadPoolExecutor          defaultRequestExecutor;
 
     @Autowired
     private MetaNodeExchanger           metaNodeExchanger;
@@ -320,7 +302,7 @@ public class DefaultMetaServiceImpl implements IMetaServerService {
         try {
             if (clientStart.compareAndSet(false, true)) {
                 String serverConf = getServerConfig();
-                raftClient = new RaftClient(getGroup(), serverConf, defaultRequestExecutor);
+                raftClient = new RaftClient(getGroup(), serverConf);
                 raftClient.start();
             }
         } catch (Exception e) {
@@ -334,7 +316,7 @@ public class DefaultMetaServiceImpl implements IMetaServerService {
         Set<String> ips = dataServerConfig.getMetaServerIpAddresses();
         if (ips != null && !ips.isEmpty()) {
             ret = ips.stream().map(ip -> ip + ":" + ValueConstants.RAFT_SERVER_PORT)
-                .collect(Collectors.joining(","));
+                    .collect(Collectors.joining(","));
         }
         if (ret.isEmpty()) {
             throw new IllegalArgumentException("Init raft server config error!");

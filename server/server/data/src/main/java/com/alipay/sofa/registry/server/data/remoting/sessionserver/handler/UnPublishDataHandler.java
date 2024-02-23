@@ -16,13 +16,6 @@
  */
 package com.alipay.sofa.registry.server.data.remoting.sessionserver.handler;
 
-import java.util.Map;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ThreadPoolExecutor;
-
-import com.alipay.sofa.registry.common.model.constants.ValueConstants;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import com.alipay.sofa.registry.common.model.CommonResponse;
 import com.alipay.sofa.registry.common.model.Node;
 import com.alipay.sofa.registry.common.model.dataserver.Datum;
@@ -40,6 +33,11 @@ import com.alipay.sofa.registry.server.data.remoting.handler.AbstractServerHandl
 import com.alipay.sofa.registry.server.data.remoting.sessionserver.forward.ForwardService;
 import com.alipay.sofa.registry.server.data.renew.DatumLeaseManager;
 import com.alipay.sofa.registry.util.ParaCheckUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * processor to unPublish specific data
@@ -116,9 +114,7 @@ public class UnPublishDataHandler extends AbstractServerHandler<UnPublishDataReq
             if (pubMap != null) {
                 Publisher publisher = pubMap.get(request.getRegisterId());
                 if (publisher != null) {
-                    return publisher.getSourceAddress().getAddressString()
-                           + ValueConstants.CONNECT_ID_SPLIT
-                           + publisher.getTargetAddress().getAddressString();
+                    return publisher.getSourceAddress().getAddressString();
                 }
             }
         }
